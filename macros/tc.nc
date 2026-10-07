@@ -29,7 +29,7 @@ o1000 else
         (print, Tool is out of range. Manually unload tool and cycle start to continue.)
         M0
     o1300 else
-        G53 G90 G0 X1211.400 Y[[[#<_current_tool> - 1] * 45.000] + 80.600]
+        G53 G90 G0 X1211.400 Y[[[#<_current_tool> - 1] * 45.000] + 85.400]
         G53 G90 G0 Z-82.000
         M4 S2100.0
         G4 P1
@@ -59,7 +59,7 @@ o1000 else
     o1400 if [#<_selected_tool> EQ 0]
         G53 G90 G0 Z0.000
     o1400 elseif [#<_selected_tool> LE 6]
-        G53 G90 G0 X1211.400 Y[[[#<_selected_tool> - 1] * 45.000] + 80.600]
+        G53 G90 G0 X1211.400 Y[[[#<_selected_tool> - 1] * 45.000] + 85.400]
         G53 G90 G0 Z-82.000
         M3 S1800.0
         G4 P1
@@ -95,7 +95,7 @@ o1000 else
     o1400 endif
     M61 Q[#<_selected_tool>]
     o1500 if [#<_selected_tool> GT 0]
-        G53 G90 G0 X1211.000 Y27.000
+        G53 G90 G0 X1211.000 Y32.000
         G53 G90 G0 Z0.000
         G38.2 G91 Z-75.000 F600.0
         G38.4 G91 Z10.000 F50.0

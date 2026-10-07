@@ -10,14 +10,14 @@ All in G53 machine coordinates. Machine Z0 is at the top, at the home switch.
 
 | Tool | X | Y |
 |---|---|---|
-| 1 | 1211.400 | 80.600 |
-| 2 | 1211.400 | 125.600 |
-| 3 | 1211.400 | 170.600 |
-| 4 | 1211.400 | 215.600 |
-| 5 | 1211.400 | 260.600 |
-| 6 | 1211.400 | 305.600 |
+| 1 | 1211.400 | 85.400 |
+| 2 | 1211.400 | 130.400 |
+| 3 | 1211.400 | 175.400 |
+| 4 | 1211.400 | 220.400 |
+| 5 | 1211.400 | 265.400 |
+| 6 | 1211.400 | 310.400 |
 
-Pitch 45.000 mm, base Y80.600. Tool setter sits at **X1211.000 Y27.000** — it is
+Pitch 45.000 mm, base Y85.400. Tool setter sits at **X1211.000 Y32.000** — it is
 separate hardware that happens to share an X value with the pockets, so pocket
 corrections do not move it.
 
