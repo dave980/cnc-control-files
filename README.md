@@ -7,6 +7,8 @@ linear magazine automatic tool changer.
 Everything here is the as-built state of a machine that homes, cuts and changes
 tools. Values were measured on the machine, not copied from a template.
 
+![The mill, spindle over the RapidChange magazine](docs/images/spindle-and-magazine.jpg)
+
 ## Machine
 
 | Item | Detail |
@@ -14,8 +16,8 @@ tools. Values were measured on the machine, not copied from a template.
 | Controller | Doberman CNC Board (Bart Dring), ESP32-S3, FluidNC |
 | Motors | NEMA 24, 5.0 A, 3 N·m — StepperOnline 24E1K-30 |
 | Drivers | CL57T v4.0 closed loop |
-| Motor supply | 48 V |
-| Logic supply | 12 V |
+| Motor supply | Meanwell XDR-960E-48 — 48 V, 20 A |
+| Logic supply | Lawlron NDR-120-12 — 12 V, 10 A |
 | Rails | HGR20 throughout — X and Y 1500 mm, Z 300 mm with HGH20CA blocks |
 | Ball screws | 1605, 5 mm pitch — X/Y RM1605 1500 mm, Z SFU1605 350 mm, BK12/BF12 supports |
 | Axes | X, Y1, Y2 (auto-squaring gantry), Z |
@@ -45,6 +47,7 @@ docs/vfd-yl620a.md              VFD parameters and speed calibration
 docs/tool-changer.md            ATC coordinates, sequence, recovery
 docs/troubleshooting.md         problems hit during commissioning and what fixed them
 docs/deploying.md               getting files onto the controller
+docs/images/                    photos of the machine and the wiring
 tools/deploy.sh                 upload config and macros over the network
 tools/deploy.ps1                the same, for Windows PowerShell
 tools/deploy.cmd                double-clickable launcher for the above

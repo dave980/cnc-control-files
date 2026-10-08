@@ -31,6 +31,11 @@ corrections do not move it.
 | −82 | Approach, just above the nut |
 | −105 | Full engagement |
 
+![Spindle at the magazine](images/spindle-and-magazine.jpg)
+
+Six pockets in a line along Y, tool setter at the near end. The spindle nose is
+at the top of its travel here, which is 90 mm clear of the magazine.
+
 ## Z geometry
 
 Measured datums, both from the top of the spoil board:
