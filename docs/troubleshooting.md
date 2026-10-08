@@ -118,10 +118,6 @@ works, but it is the tightest margin on the machine — see `tool-changer.md`.
 The 45.000 mm pitch and the Y85.400 base are confirmed: all six pockets have
 been exercised over repeated tool changes.
 
-The 0.4 mm discrepancy noticed earlier between pockets 1 and 6 was measured
-while the Y rail was still binding, so it was never a pitch error — it was the
-drift. Fixing the rail removed it.
-
 ## Open
 
 ### CL57T alarm outputs are not read by the controller
