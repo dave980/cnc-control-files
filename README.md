@@ -16,7 +16,7 @@ tools. Values were measured on the machine, not copied from a template.
 | Drivers | CL57T v4.0 closed loop |
 | Motor supply | 48 V |
 | Logic supply | 12 V |
-| Rails (X, Y) | VEVOR HGR20, 1500 mm |
+| Rails | HGR20 throughout — X and Y 1500 mm, Z 300 mm with HGH20CA blocks |
 | Ball screws | RM1605, 1500 mm, BF12/BK12 end supports — 5 mm pitch |
 | Axes | X, Y1, Y2 (auto-squaring gantry), Z |
 | Endstops | ROURCK SN04-N inductive, NPN-NO, run at 5 V |
@@ -24,7 +24,8 @@ tools. Values were measured on the machine, not copied from a template.
 | VFD | YL620-A |
 | Tool changer | RapidChange linear magazine Premium, 6 pockets, ER20 |
 
-Travel: X 1220 mm, Y 1180 mm.
+Travel: X 1220 mm, Y 1180 mm. Z has no `max_travel_mm` set — see
+`docs/troubleshooting.md`.
 
 ## Layout
 

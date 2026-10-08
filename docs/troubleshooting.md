@@ -98,6 +98,16 @@ Things that turned out not to be the cause, for the record:
 
 ## Open
 
+### Z has no max_travel_mm
+
+X and Y declare 1220 mm and 1180 mm, but the Z axis block has no
+`max_travel_mm`, so it falls back to FluidNC's default. On 300 mm rails the real
+travel is well under that, which means soft limits do not protect the bottom of
+Z — only the home switch at the top and `hard_limits: true` are doing any work.
+
+`tc.nc` reaches Z−105, so whatever the figure is, it has to exceed that
+comfortably. Measure from the home switch to the lowest safe position and set it.
+
 ### Magazine pitch — confirm pocket 6
 
 The 45.000 mm pitch has not been checked against a far pocket since the Y
