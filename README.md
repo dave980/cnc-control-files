@@ -47,6 +47,7 @@ docs/troubleshooting.md         problems hit during commissioning and what fixed
 docs/deploying.md               getting files onto the controller
 tools/deploy.sh                 upload config and macros over the network
 tools/deploy.ps1                the same, for Windows PowerShell
+tools/deploy.cmd                double-clickable launcher for the above
 ```
 
 ## Installation

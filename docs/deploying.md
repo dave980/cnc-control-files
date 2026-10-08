@@ -38,6 +38,25 @@ scripts. Either unblock the file or run it for one session only:
 powershell -ExecutionPolicy Bypass -File .\tools\deploy.ps1 -Board 192.168.0.23
 ```
 
+### Double-clicking it
+
+`tools\deploy.cmd` is the double-click entry point. It shows which commit is
+checked out, does a fast-forward-only `git pull` so you can see what changed,
+runs `deploy.ps1`, and leaves the window open at the end.
+
+To put it on the desktop: right-click `deploy.cmd` → **Send to** → **Desktop
+(create shortcut)**. Don't copy the file to the desktop — the shortcut has to
+point at the one inside the repo, because the script locates the config and
+macros relative to its own position.
+
+The board address is set near the top of the file (`set BOARD=192.168.0.23`).
+Editing it there is fine; it is also accepted as an argument if you ever need a
+second machine.
+
+The confirmation prompt still applies — a double click gets you as far as being
+asked whether the machine is idle, not past it. `git pull --ff-only` refuses to
+merge if you have local commits, rather than quietly combining them.
+
 ### Do not keep this repo in OneDrive
 
 A git repository inside a OneDrive folder is a known source of trouble.
