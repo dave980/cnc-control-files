@@ -95,3 +95,25 @@ Not fitted:
 - **Dust cover** — physically removed from the magazine. It is servo driven
   through an ATtiny and never responded to a 5 V logic signal, so it is out of
   the config and out of the macros. See `docs/tool-changer.md`.
+
+## Credits
+
+The machine is built from **[LienCNC-V2](https://github.com/eclsnowman/LienCNC-V2)**
+by Eric Lien — his mechanical design, BOM and drawings. Full credit to him for
+the machine; this repository covers only the control side of one build of it.
+
+Nothing in this repository is copied from his. LienCNC-V2 ships a UCCNC `.pro`
+configuration, while this machine runs FluidNC on a Doberman board, so the
+config and macros here were written from scratch for different software.
+
+At the time of writing that repository has no LICENSE file, and the Printables
+listing does not name one either, so his CAD, drawings, BOM and controller
+config are all-rights-reserved by default. Building a machine from a published
+design is fine; redistributing his files is not. Link to the original rather
+than copying anything in here.
+
+Also standing on:
+
+- [FluidNC](https://github.com/bdring/FluidNC) and the Doberman board — Bart Dring
+- [RapidChange ATC](https://rapidchangeatc.com/) — the tool changer
+- [RapidChangeATC_FluidNC_M6_Macro](https://github.com/rvalotta/RapidChangeATC_FluidNC_M6_Macro) — Ryan Valotta, the basis for `tc.nc`
