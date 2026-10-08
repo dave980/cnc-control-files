@@ -7,8 +7,6 @@ linear magazine automatic tool changer.
 Everything here is the as-built state of a machine that homes, cuts and changes
 tools. Values were measured on the machine, not copied from a template.
 
-![The mill, spindle over the RapidChange magazine](docs/images/spindle-and-magazine.jpg)
-
 ![The mill](docs/images/machine-overview.jpg)
 
 ## Machine
@@ -50,7 +48,6 @@ docs/tool-changer.md            ATC coordinates, sequence, recovery
 docs/troubleshooting.md         problems hit during commissioning and what fixed them
 docs/deploying.md               getting files onto the controller
 docs/images/                    photos of the machine and the wiring
-docs/images/                    photos of the machine and the wiring
 tools/deploy.sh                 upload config and macros over the network
 tools/deploy.ps1                the same, for Windows PowerShell
 tools/deploy.cmd                double-clickable launcher for the above
@@ -81,6 +78,10 @@ to come from a machine on the same network.
 $H              home — Z first, then XY with Y/Y2 auto-squaring
 M61 Q<n>        tell FluidNC what is in the spindle (Q0 if empty)
 ```
+
+**After an E-stop, `$H` before anything else.** The E-stop cuts motor and
+spindle power but leaves the controller running, so FluidNC does not know it
+happened and the position on screen is stale. See `docs/wiring.md`.
 
 `M61` is not optional. FluidNC sets `current_tool = -1` on every restart, and `tc.nc`
 aborts with an alarm when it sees a negative tool number. `$H` does not fix this —
@@ -124,22 +125,8 @@ Also standing on:
 - [RapidChange ATC](https://rapidchangeatc.com/) — the tool changer
 - [RapidChangeATC_FluidNC_M6_Macro](https://github.com/rvalotta/RapidChangeATC_FluidNC_M6_Macro) — Ryan Valotta, the basis for `tc.nc`
 
-## Credits
-
-**Machine design — [LienCNC V2](https://github.com/eclsnowman/LienCNC-V2) by Eric
-Lien (eclsnowman).** This mill is built largely to that design. The repo holds
-the SolidWorks files, prints, BOM and component manuals; the README invites
-people to build from it or use it as a jumping-off point, which is exactly what
-happened here. Everything in *this* repo is the control side — config, macros
-and commissioning notes — none of which came from there, and none of Eric's
-files are redistributed here.
-
-**Tool change macros — RapidChange ATC, via
-[rvalotta/RapidChangeATC_FluidNC_M6_Macro](https://github.com/rvalotta/RapidChangeATC_FluidNC_M6_Macro).**
 `tc.nc`, `measuretool.nc` and `findzposition.nc` started as RapidChange's
-generated macros and have been modified for this machine: coordinates measured
-on the hardware, the dust cover calls removed, probe seek raised to F600.
-
-Neither upstream project states a license, so this repo carries none either —
-adding one would imply rights over the macro structure that are not mine to
-grant.
+generated macros and are modified for this machine: coordinates measured on the
+hardware, the dust cover calls removed, probe seek raised to F600. That upstream
+states no license either, so this repo carries none — adding one would imply
+rights over the macro structure that are not mine to grant.

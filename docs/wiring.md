@@ -87,27 +87,47 @@ closed-loop feedback.
 The other half carries SPNDL and TOOL CHNG — the 5-wire magazine harness lands
 on that one.
 
-## The hardware
+## Emergency stop
 
-![Control cabinet](images/control-cabinet.jpg)
+![Emergency stop](images/emergency-stop.jpg)
 
-Cabinet, roughly top left to bottom right: Meanwell XDR-960E-48 (48 V, 20 A)
-for the motors, the CL57T closed-loop drivers below it, Lawlron NDR-120-12
-(12 V, 10 A) for logic, and the YL620-A VFD across the bottom. The Doberman is
-to the left of the VFD.
+Hardwired paddle switch on the front of the table. It **cuts power to the
+moving parts — motors and spindle — and deliberately leaves the Doberman
+powered.**
 
-![Doberman board](images/doberman-board.jpg)
+Keeping the controller alive is the right call. The WebUI stays up, the config
+stays loaded, and `current_tool` is not reset to −1, so you are not re-doing
+`M61` on top of everything else.
 
-![Breakout panel - STEP, E-STOP, ENCODER](images/breakout-step-estop-encoder.jpg)
+**But it means FluidNC does not know the E-stop happened.** The controller keeps
+its own idea of position while the motors are dead, so after an E-stop the
+displayed MPos is stale and looks perfectly normal. Nothing alarms and nothing
+forces a re-home.
 
-Machine-side wiring lands on a breakout panel rather than at the board
-directly. STEP per axis (X, Y1, Y2, Z), E-STOP, and ENCODER for the CL57T
-closed-loop feedback.
+**Always `$H` after an E-stop**, before any move. Treat the position on screen
+as fiction until you have.
 
-![Breakout panel - spindle and tool change](images/breakout-spindle-toolchange.jpg)
+### Worth wiring: tell the controller
 
-The other half carries SPNDL and TOOL CHNG. The 5-wire magazine harness lands
-on that one.
+FluidNC has two control inputs for exactly this, both of which do an immediate
+hard stop plus a critical alarm that only a soft reset clears, and which block
+homing and unlock until then:
+
+```yaml
+control:
+  estop_pin: gpio.XX       # a spare contact on the E-stop switch
+  fault_pin: gpio.XX       # the CL57T ALM outputs, ganged
+```
+
+`estop_pin` is meant for a user-operated switch; `fault_pin` is meant, in the
+firmware's own words, for "a stepper driver's fault/alarm output". The CL57T
+drivers have those alarm outputs and nothing is currently reading them — so a
+driver that faults on position error looks exactly like lost steps.
+
+Neither replaces cutting power. FluidNC's own comment on `estop_pin` is blunt
+about it: "this alone is only a control-input-level stop; a true e-stop should
+also cut power directly." The hardwired switch is the real safety function.
+Adding the signal just stops the software from lying about where the machine is.
 
 ## Doberman outputs, for reference
 
