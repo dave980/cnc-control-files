@@ -140,45 +140,71 @@ common can only be paralleled:
 Parallel wired-OR is the right behaviour — any one driver asserting pulls the
 input — but it has a cost worth stating plainly.
 
-**It fails silent.** A broken ALM wire or a connector knocked off removes that
-driver's protection with no indication at all; the input sits healthy and
-nothing ever fires. With a floating contact a series chain would have caught
-that, because an open loop is itself an alarm. Single-ended, there is no
-fail-safe arrangement available. The protection is therefore only as good as
-the last time it was tested — so test it deliberately, and re-test after any
-work in the cabinet.
+**If the output conducts on alarm, it fails silent.** A broken ALM wire or a
+connector knocked off removes that driver's protection with no indication; the
+input sits healthy and nothing ever fires. A series chain of floating contacts
+would have caught that, because an open loop is itself an alarm — but
+common-emitter outputs sharing COM- cannot be chained. So the protection is
+only as good as the last time it was tested. Test it deliberately, and re-test
+after any work in the cabinet.
 
-#### The driver side: ENA, ALM, BRK
+Which way the output rests decides this, and it also decides whether paralleling
+works at all — see below before wiring.
 
-The driver groups three single-ended signals together — **ENA** (an input),
-**ALM** and **BRK** (both outputs). Grouped single-ended signals share a
-reference, so somewhere in that connector is the common those three return
-through. Find it before wiring anything: it is where the ALM return has to
-land, and it is not necessarily the same terminal as the step/direction return.
+#### The driver's connectors
 
-**Do not wire BRK by mistake.** It is a brake-release output for motors with an
-electromagnetic brake. These motors (24E1K-30) have none, so BRK stays
-unconnected — and it is worth being deliberate about, because BRK asserts
-during *normal* operation. Wired into `fault_pin` it would give either a
-permanent alarm or a permanently healthy input, and both look like a config
-problem rather than a wiring one.
+From the label on the driver itself:
 
-#### Check the common before connecting anything
+| Connector | Pins |
+|---|---|
+| Control | PUL+, PUL-, DIR+, DIR-, ENA+, ENA-, **ALM**, **BRK**, **COM-** |
+| Encoder | EA+, EA-, EB+, EB-, VCC, EGND |
+| Power and motor | A+, A-, B+, B-, +Vdc, GND |
 
-With the driver powered, meter from that group's common to the Doberman's input
-header GND. Expect **near 0 V** (already shared through the step/dir return) or
-floating.
+Step, direction and enable are differential pairs. **ALM and BRK are the only
+single-ended signals, and COM- is their common** — the shared emitter of the two
+output transistors. So the connection is:
 
-**If it reads anything near 48 V, stop.** That would mean the group is
-referenced to the motor supply rather than the signal side, and a direct wire
-to gpio.37 would put 48 V across an opto input rated for 5. That case needs an
-isolator, not a wire.
+- `ALM` to gpio.37's signal pin
+- `COM-` to the input header GND
+
+That is an open-collector NPN sinking to COM-, which is what the opto input
+wants: pull the signal pin down through the onboard pull-up. Four of them
+parallel wired-OR correctly, with all four COM- on the same ground.
+
+**BRK sits next to ALM and is also an output.** It is brake release for motors
+with an electromagnetic brake, and the 24E1K-30 has none, so it stays
+unconnected. Worth being deliberate about: BRK asserts during *normal*
+operation, so on `fault_pin` it gives either a permanent alarm or a permanently
+healthy input, and both read as a config problem rather than a wiring one.
+
+#### What COM- is tied to, before bonding it
+
+The control inputs are opto-isolated, but COM- is the driver's internal logic
+common, and on drivers of this kind that is generally referenced to the power
+ground — the 48 V supply's **negative**, not 48 V itself. So the wire from COM-
+to the Doberman's input GND may **bond the motor supply's negative to the logic
+ground**. That is a different decision from landing a signal, and it should be
+made deliberately.
+
+Two checks:
+
+- Powered off, driver disconnected: continuity from COM- to the driver's `GND`
+  power terminal. Continuity means COM- *is* the power ground.
+- Powered: DC volts from COM- to the Doberman input GND. Near 0 V means they are
+  already effectively common and the wire changes nothing. A volt or more means
+  they are not, and the wire creates the bond.
+
+If they are not already common, bond at **one** point — a star ground — rather
+than adding four parallel return paths through the ALM harnesses. Four COM-
+wires running alongside motor cables is a ground loop with motor current in it,
+and that is how a perfectly good endstop starts behaving the way the Z one did.
 
 #### Polarity must be measured, not assumed
 
-Published descriptions of this output contradict each other, so measure. With
-the drivers powered and idle, meter resistance from one ALM pin to the group
-common:
+The label gives the pinout but not the sense, and published descriptions of
+this output contradict each other. With the drivers powered and idle, meter
+resistance from one ALM pin to COM-:
 
 | Idle reading | Output | Config |
 |---|---|---|
@@ -188,17 +214,29 @@ common:
 Then force an alarm on that one driver — unplug its encoder and command a short
 move — and re-measure. Two readings on one driver settle it for all four.
 
-Open-collector sinking is the likely answer, because that is the arrangement
-single-ended outputs in a group like this normally use, and it is the one that
-wires straight to gpio.37. Likely is not measured, though.
+The red PWR/ALM LED on the driver is the cross-check — it should agree with
+whichever state the meter calls the alarm.
 
-**If it turns out to be active high** — sourcing on alarm rather than sinking —
-it cannot drive gpio.37 directly. The opto input has an onboard pull-up and
-expects to be pulled *down*; a sourcing output just fights the pull-up and
-nothing happens. That case needs one inverting stage: each ALM through a signal
-diode (1N4148) into a shared base resistor, a small NPN with its emitter to
-GND and its collector on gpio.37. The diodes keep the four outputs from
-back-feeding each other.
+Sinking is certain — COM- is the emitter common, so the transistor can only
+pull ALM down toward it. The open question is which way it rests.
+
+**Conducts on alarm (open when idle)** is the straightforward case and the
+expected one: `fault_pin: gpio.37:low`, four ALM pins in parallel, done.
+
+**Conducts when healthy (near short when idle)** breaks the parallel
+arrangement, and it is worth understanding why before wiring. On its own that
+sense is the better one — the pin rests low and goes high on alarm, so a broken
+wire *raises* the alarm, which is the fail-safe behaviour a series chain would
+have given. But four of them in parallel **AND** rather than OR: one driver
+alarming opens its transistor while the other three still hold the pin low, so
+all four would have to fault before anything fired. Exactly the trap that
+parallel-wiring a normally-closed contact sets.
+
+There is no wiring-only fix for that case, because common-emitter outputs
+sharing COM- cannot be chained in series. It needs a device per driver — four
+PC817 optocouplers, each LED driven by one ALM, all four transistors paralleled
+onto gpio.37. That also settles the COM- grounding question, since each
+driver's output side stays isolated from the Doberman's.
 
 ### Testing it
 
