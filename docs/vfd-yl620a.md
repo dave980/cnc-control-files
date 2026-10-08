@@ -90,9 +90,17 @@ pip install pyserial
 python tools/vfd_dump.py --port COM5 -o docs/vfd-parameters.md
 ```
 
-You need a USB-to-RS485 adapter on the VFD's 485 terminals. If every read times
-out, swap A and B. About 12 seconds for the full sweep of 192 addresses;
-unimplemented ones return a Modbus exception and are skipped.
+Adapter used here: **DSD TECH SH-U11F** — isolated, FTDI chip, screw terminals.
+Isolation matters in this cabinet: a non-isolated adapter would tie the laptop's
+USB ground to the VFD's ground reference, next to a 2.2 kW drive switching at
+13 kHz.
+
+Two wires to the VFD's RS485 terminals, A to A and B to B. No termination
+resistor — the run is about a metre to a single device. If every read times out,
+swap A and B; that is the usual first mistake and it does no harm.
+
+About 12 seconds for the full sweep of 192 addresses; unimplemented ones return
+a Modbus exception and are skipped.
 
 Comms settings on this drive, which are the script's defaults:
 
