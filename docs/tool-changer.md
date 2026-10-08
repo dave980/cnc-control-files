@@ -39,6 +39,12 @@ corrections do not move it.
 | Probe seek | F600 |
 | Probe set | F50 |
 
+**Z travel is 115 mm and the engagement depth is 105 mm.** Ten millimetres of
+clearance, which is the tightest margin on the machine. Consequences worth
+keeping in mind: there is no room to deepen the pockets, a magazine remount that
+sits any lower will not reach, and the soft limit at −115 is the only thing
+protecting the bottom of Z since there is no lower limit switch.
+
 **Z `max_rate_mm_per_min` must stay above 2000.** It was at 1500, which silently
 clamped every engagement move to 75 % of the designed feed. It is now 2500.
 

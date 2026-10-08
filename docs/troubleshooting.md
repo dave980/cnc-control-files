@@ -96,23 +96,20 @@ Things that turned out not to be the cause, for the record:
   limit they fault and assert ALM, which looks exactly like lost steps if ALM is
   not wired back to the controller.
 
+### Z had no max_travel_mm
+
+X and Y declared their travel but the Z block did not, so Z fell back to
+FluidNC's default and the bottom of the axis had no soft limit. Z has only a
+positive (top) limit switch, so soft limits are the *only* protection at the
+bottom.
+
+Measured travel from the home switch is **115 mm**, now set as
+`max_travel_mm: 115.000`.
+
+That leaves 10 mm of clearance below the Z−105 the tool changer plunges to. It
+works, but it is the tightest margin on the machine — see `tool-changer.md`.
+
 ## Open
-
-### Z has no max_travel_mm
-
-X and Y declare 1220 mm and 1180 mm, but the Z axis block has no
-`max_travel_mm`, so it falls back to FluidNC's default. On 300 mm rails the real
-travel is well under that, which means soft limits do not protect the bottom of
-Z — only the home switch at the top and `hard_limits: true` are doing any work.
-
-`tc.nc` reaches Z−105, so whatever the figure is, it has to exceed that
-comfortably. Measure from the home switch to the lowest safe position and set it.
-
-Worth measuring rather than assuming, because Z travel here may be tighter than
-it looks. The SFU1605 screw is 350 mm, but the rails are only 300 mm and each
-rail carries two HGH20CA blocks at roughly 77 mm apiece. Once the block span and
-end clearance come off, usable travel could land not far above the 105 mm the
-tool changer needs. The rails, not the screw, are the limiting part.
 
 ### Magazine pitch — confirm pocket 6
 

@@ -24,8 +24,8 @@ tools. Values were measured on the machine, not copied from a template.
 | VFD | YL620-A |
 | Tool changer | RapidChange linear magazine Premium, 6 pockets, ER20 |
 
-Travel: X 1220 mm, Y 1180 mm. Z has no `max_travel_mm` set — see
-`docs/troubleshooting.md`.
+Travel: X 1220 mm, Y 1180 mm, Z 115 mm. Z is tight — `tc.nc` reaches −105, so
+there is 10 mm to spare. See `docs/tool-changer.md`.
 
 ## Layout
 

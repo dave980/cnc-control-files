@@ -74,6 +74,7 @@ axes:
     steps_per_mm: 320.000
     max_rate_mm_per_min: 2500.0   # Must stay above the F2000 engagement feed in tc.nc
     acceleration_mm_per_sec2: 100.0
+    max_travel_mm: 115.000        # Measured. tc.nc reaches -105, so only 10mm spare
     homing:
       cycle: 1                    # Z homes FIRST on cycle 1 to avoid crashing bits
       positive_direction: true
