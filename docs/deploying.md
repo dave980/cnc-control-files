@@ -18,16 +18,18 @@ Three ways to arrange that, in order of how much machinery they need:
 ## tools/deploy.sh
 
 ```
-./tools/deploy.sh 192.168.1.50             # upload only
-./tools/deploy.sh 192.168.1.50 --restart   # upload then $Bye
+./tools/deploy.sh 192.168.0.23             # upload only
+./tools/deploy.sh 192.168.0.23 --restart   # upload then $Bye
+./tools/deploy.sh 192.168.0.23 --yes       # skip the confirmation prompt
 ```
 
 It uploads `config/config.yaml` and the three macros to **internal flash**
 (LocalFS), then lists what landed.
 
-**It refuses to upload unless the machine reports Idle, Alarm or Sleep.** That
-check is the point of the script rather than a nicety — an upload mid-job would
-be bad, and a `$Bye` mid-job worse.
+**Machine state cannot be checked automatically** — see the API note below. The
+script verifies the board is reachable and really is FluidNC, then asks you to
+confirm the machine is idle. Without a terminal it refuses outright unless
+`--yes` is given, so a cron job or CI run cannot deploy silently by accident.
 
 Config changes need a restart. Macros take effect immediately, because `tc.nc`
 is read from flash each time M6 fires.
@@ -41,7 +43,24 @@ Confirmed against FluidNC's `WebUIServer.cpp`:
 | `POST /files` | Upload to LocalFS. Path comes from the multipart filename; `path=` sets the directory |
 | `GET /files?path=/` | List LocalFS |
 | `POST /upload` | Upload to the SD card instead |
-| `GET /command?commandText=...` | Run a command — `?`, `$LocalFS/List`, `$Bye` |
+| `GET /command?commandText=...` | Run a command |
+
+**The `/command` endpoint splits two ways, and it matters.** Commands starting
+with `[ESP` or `$/` go through `synchronousCommand` and their output comes back
+in the HTTP response. Everything else — `?`, `$LocalFS/List`, `$Bye` — goes
+through `websocketCommand`, so the output goes to the websocket and curl sees
+nothing useful.
+
+So over plain HTTP you can read:
+
+- `[ESP800]` — firmware info, which is what the script uses to confirm it is
+  talking to FluidNC
+- `[ESP420]` — system stats
+- `GET /files?path=/` — the LocalFS listing, as JSON
+
+But **not** machine state. `?` returns its status report over the websocket
+only, which is why the idle check is a human confirmation rather than an
+automated gate. Reading state from a script would mean a websocket client.
 
 A form field named `<filename>S` carrying the byte count is optional, but worth
 sending: FluidNC compares it against what actually arrived and fails the upload
