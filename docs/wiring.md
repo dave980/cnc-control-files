@@ -22,10 +22,9 @@ The `Switch Vcc` jumper is global, and the tool changer's sensors need 5 V, so
 the endstops run at 5 V too — there is no way to have one at 5 V and the other
 at 12 V from the board.
 
-Worth knowing: most SN04-N variants are specified from 6 V up, so 5 V is at or
-just below the bottom of the datasheet range. They work reliably here. If
-endstops ever start behaving erratically, supply voltage is the first thing to
-rule out rather than the last.
+These SN04-N are specified 5–30 V DC, so 5 V is in spec but at the very bottom
+of the range. They work reliably. If endstops ever start behaving erratically,
+supply voltage is worth ruling out early rather than late.
 
 | Axis | Pin | Config |
 |---|---|---|
