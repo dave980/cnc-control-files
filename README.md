@@ -44,6 +44,8 @@ docs/wiring.md                  pin assignments and the reasoning behind them
 docs/vfd-yl620a.md              VFD parameters and speed calibration
 docs/tool-changer.md            ATC coordinates, sequence, recovery
 docs/troubleshooting.md         problems hit during commissioning and what fixed them
+docs/deploying.md               getting files onto the controller
+tools/deploy.sh                 upload config and macros over the network
 ```
 
 ## Installation
@@ -51,10 +53,19 @@ docs/troubleshooting.md         problems hit during commissioning and what fixed
 Macros live in the controller's **internal flash**, not on an SD card. This matters —
 `$SD/Run=` silently reports success and does nothing when the file isn't on a card.
 
-1. Upload `config/config.yaml` and the three `.nc` files via the FluidNC web UI
-2. `$Bye` to restart
-3. `$LocalFS/List` — confirm `tc.nc`, `measuretool.nc`, `findzposition.nc` are present
-4. `$CD` — confirm the config loaded
+Either through the FluidNC web UI, or over the network:
+
+```
+./tools/deploy.sh <board-ip> --restart
+```
+
+Then confirm:
+
+1. `$LocalFS/List` — `tc.nc`, `measuretool.nc`, `findzposition.nc` present
+2. `$CD` — the config loaded
+
+See `docs/deploying.md`. There is no direct GitHub-to-board path; the upload has
+to come from a machine on the same network.
 
 ## Daily startup
 
