@@ -123,6 +123,15 @@ macros:
   macro0: $LocalFS/Run=measuretool.nc
   macro1: $LocalFS/Run=findzposition.nc
 
+# --- Driver alarms and E-stop signalling (not yet wired) ---
+# gpio.37 is free: it was the dust cover wire before that was abandoned.
+# Polarity depends on how the CL57T ALM output behaves -- see docs/wiring.md.
+#   closes on alarm (NO), wired in parallel -> gpio.37:low
+#   opens on alarm (NC), wired in series    -> gpio.37
+# control:
+#   fault_pin: gpio.37:low     # all four CL57T ALM outputs, ganged
+#   estop_pin: gpio.XX         # spare contact on the E-stop, if one is added
+
 spi:
   miso_pin: gpio.2
   mosi_pin: gpio.1

@@ -115,9 +115,51 @@ homing and unlock until then:
 
 ```yaml
 control:
+  fault_pin: gpio.37:low   # all four CL57T ALM outputs, ganged
   estop_pin: gpio.XX       # a spare contact on the E-stop switch
-  fault_pin: gpio.XX       # the CL57T ALM outputs, ganged
 ```
+
+**gpio.37 is the pin to use.** It is a free opto input — it carried the dust
+cover wire before that was abandoned — and it sits in the same header block as
+the limit switches, so the wiring lands next to everything else.
+
+### Ganging four ALM outputs
+
+The CL57T alarm output is an opto-isolated switch (ALM+ / ALM−), floating and
+independent of the 48 V side, so the outputs can share one controller input.
+**How you combine them depends on which way the switch rests**, and getting it
+backwards gives you an input that looks healthy and never fires:
+
+| ALM behaviour | Wire them | Config |
+|---|---|---|
+| Closes on alarm (NO) | **parallel** — all ALM+ to gpio.37 signal, all ALM− to input GND | `fault_pin: gpio.37:low` |
+| Opens on alarm (NC) | **series** — a daisy chain from gpio.37 signal through each driver to GND | `fault_pin: gpio.37` |
+
+Parallel on a normally-open output ORs them: any one driver alarming pulls the
+input low. Parallel on a normally-*closed* output would AND them instead, and
+all four would have to fault before anything happened.
+
+**Prefer series/NC if the driver supports it.** A series chain is fail-safe — a
+broken wire or a pulled connector opens the loop and raises the alarm. A
+parallel NO arrangement fails silent: lose a wire and you lose the protection
+without any indication.
+
+Check which you have before wiring: meter across one driver's ALM+ / ALM− with
+the machine powered and idle. Continuity means normally-closed, open means
+normally-open.
+
+### Testing it
+
+Two stages, because they fail differently.
+
+1. **The input and the config.** With `fault_pin` set and the board restarted,
+   short gpio.37's signal pin to GND. FluidNC should drop straight into a
+   critical alarm.
+2. **A real driver fault.** Unplug one motor's encoder and command a short move
+   — the driver sees position error it cannot correct and asserts ALM.
+
+A critical alarm only clears with a soft reset (Ctrl-X), and that resets
+`current_tool` to −1. So after testing: `$H`, then `M61 Q<n>`.
 
 `estop_pin` is meant for a user-operated switch; `fault_pin` is meant, in the
 firmware's own words, for "a stepper driver's fault/alarm output". The CL57T
