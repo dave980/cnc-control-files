@@ -148,11 +148,37 @@ fail-safe arrangement available. The protection is therefore only as good as
 the last time it was tested — so test it deliberately, and re-test after any
 work in the cabinet.
 
+#### The driver side: ENA, ALM, BRK
+
+The driver groups three single-ended signals together — **ENA** (an input),
+**ALM** and **BRK** (both outputs). Grouped single-ended signals share a
+reference, so somewhere in that connector is the common those three return
+through. Find it before wiring anything: it is where the ALM return has to
+land, and it is not necessarily the same terminal as the step/direction return.
+
+**Do not wire BRK by mistake.** It is a brake-release output for motors with an
+electromagnetic brake. These motors (24E1K-30) have none, so BRK stays
+unconnected — and it is worth being deliberate about, because BRK asserts
+during *normal* operation. Wired into `fault_pin` it would give either a
+permanent alarm or a permanently healthy input, and both look like a config
+problem rather than a wiring one.
+
+#### Check the common before connecting anything
+
+With the driver powered, meter from that group's common to the Doberman's input
+header GND. Expect **near 0 V** (already shared through the step/dir return) or
+floating.
+
+**If it reads anything near 48 V, stop.** That would mean the group is
+referenced to the motor supply rather than the signal side, and a direct wire
+to gpio.37 would put 48 V across an opto input rated for 5. That case needs an
+isolator, not a wire.
+
 #### Polarity must be measured, not assumed
 
-Published descriptions of this output disagree with each other, so measure.
-With the drivers powered and idle, meter resistance from one ALM pin to the
-driver's signal common:
+Published descriptions of this output contradict each other, so measure. With
+the drivers powered and idle, meter resistance from one ALM pin to the group
+common:
 
 | Idle reading | Output | Config |
 |---|---|---|
@@ -161,6 +187,10 @@ driver's signal common:
 
 Then force an alarm on that one driver — unplug its encoder and command a short
 move — and re-measure. Two readings on one driver settle it for all four.
+
+Open-collector sinking is the likely answer, because that is the arrangement
+single-ended outputs in a group like this normally use, and it is the one that
+wires straight to gpio.37. Likely is not measured, though.
 
 **If it turns out to be active high** — sourcing on alarm rather than sinking —
 it cannot drive gpio.37 directly. The opto input has an onboard pull-up and
