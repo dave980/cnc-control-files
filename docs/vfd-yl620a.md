@@ -121,14 +121,25 @@ FluidNC's own YL620 driver, which reads `03 03 08 00 02` — two registers from
 P03.08 and P03.09, the panel potentiometer frequency limits. That pins the
 scheme down.
 
-The same driver shows the control registers, which is what FluidNC would use if
-this spindle were ever moved from the 0-10 V module to RS485:
+The same driver also exposes the control registers:
 
 | Register | Purpose |
 |---|---|
 | 0x2000 | Run / direction / stop |
 | 0x2001 | Frequency setpoint |
 | 0x200B | Output frequency readback |
+
+**Recorded for reference only. Do not move spindle control to Modbus.** Bart
+Dring recommends 0-10 V over RS485 for the Doberman, and the reliability
+argument is decisive: an analog voltage has no protocol to fail, while a Modbus
+link adds a failure mode that does not otherwise exist. If comms drop mid-cut
+the drive does whatever P03.03 dictates — decelerate, coast, DC brake or keep
+running — and none of those is acceptable with a tool in the work. A cabinet
+containing a drive switching at 13 kHz is also the worst place to put a serial
+link that spindle control depends on.
+
+RS485 here is for **reading** parameters, where a dropped frame costs nothing
+because no motion depends on the transfer completing.
 
 ### Values come back raw
 
