@@ -78,3 +78,57 @@ speed_map: 0=0.000% 24000=100.000%
 ```
 
 Linear. All the shaping happens in the VFD.
+
+## Reading the parameters back off the drive
+
+`tools/vfd_dump.py` reads every parameter over Modbus RTU and writes them to a
+markdown table. **Read only** — it issues nothing but function code 03, so it
+cannot alter the drive.
+
+```
+pip install pyserial
+python tools/vfd_dump.py --port COM5 -o docs/vfd-parameters.md
+```
+
+You need a USB-to-RS485 adapter on the VFD's 485 terminals. If every read times
+out, swap A and B. About 12 seconds for the full sweep of 192 addresses;
+unimplemented ones return a Modbus exception and are skipped.
+
+Comms settings on this drive, which are the script's defaults:
+
+| Parameter | Value | Meaning |
+|---|---|---|
+| P03.00 | 4 | 19200 bps |
+| P03.01 | 10 | Slave address |
+| P03.02 | 2 | 8 data bits, 1 stop, no parity |
+
+### The register mapping
+
+**Pgg.ii is at register `gg * 256 + ii`**, so P03.12 is 0x030C and P12.19 is
+0x0C13.
+
+That is not from the YL620 manual, which does not document it. It comes from
+FluidNC's own YL620 driver, which reads `03 03 08 00 02` — two registers from
+0x0308 — and decodes them as the minimum and maximum RPM. 0x0308 and 0x0309 are
+P03.08 and P03.09, the panel potentiometer frequency limits. That pins the
+scheme down.
+
+The same driver shows the control registers, which is what FluidNC would use if
+this spindle were ever moved from the 0-10 V module to RS485:
+
+| Register | Purpose |
+|---|---|
+| 0x2000 | Run / direction / stop |
+| 0x2001 | Frequency setpoint |
+| 0x200B | Output frequency readback |
+
+### Values come back raw
+
+Frequencies are stored in 0.1 Hz, the same as the front panel: 4000 is 400.0 Hz,
+300 is 30.0 Hz. That is why P03.12 reads 0 rather than 0.0 and why the display
+showed 483 for 48.3 Hz during commissioning.
+
+A dump is the as-built state, not a diff. The parameters that actually matter on
+this machine are the ones documented above — the V/F curve and the analog
+scaling. The rest are factory defaults, and the setup table PDF is the reference
+for what those should be.
