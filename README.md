@@ -28,7 +28,7 @@ Travel: X 1220 mm, Y 1180 mm.
 ## Layout
 
 ```
-config/dobermann_config.yaml    FluidNC machine config
+config/config.yaml              FluidNC machine config
 macros/tc.nc                    M6 tool change
 macros/measuretool.nc           macro0 — measure current tool
 macros/findzposition.nc         macro1 — find IR beam Z position
@@ -43,7 +43,7 @@ docs/troubleshooting.md         problems hit during commissioning and what fixed
 Macros live in the controller's **internal flash**, not on an SD card. This matters —
 `$SD/Run=` silently reports success and does nothing when the file isn't on a card.
 
-1. Upload `config/dobermann_config.yaml` and the three `.nc` files via the FluidNC web UI
+1. Upload `config/config.yaml` and the three `.nc` files via the FluidNC web UI
 2. `$Bye` to restart
 3. `$LocalFS/List` — confirm `tc.nc`, `measuretool.nc`, `findzposition.nc` are present
 4. `$CD` — confirm the config loaded
