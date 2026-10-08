@@ -15,7 +15,9 @@ Several layers:
 
 - Started with `:pu` on the input pins. The Doberman inputs are opto-isolated
   with onboard pull-ups, so the extra pull-up broke them. Removed.
-- Sensors were on 5 V and marginal. Moved to 12 V from the main supply.
+- Sensors were marginal at first. 12 V was tried during debugging, but the
+  `Switch Vcc` jumper is global and the tool changer needs 5 V, so they ended up
+  back on 5 V — working reliably once the wiring and polarity were right.
 - NPN-NO sensors need `:low`.
 
 ### `MSG:WARN: Limit switches do not support positive homing dir`
@@ -68,45 +70,40 @@ paths to `$LocalFS/Run=`. Worked immediately.
 Worth remembering: `$SD/Run=` failing silently is the trap. `SD:100.00` with no
 filename means the file never ran.
 
+### Y drifted slightly, unequally between sides
+
+Both sides of the gantry drifted over repeated moves, by different amounts.
+
+**Cause: the left rail was not parallel.** Fixed by loosening that rail's
+mounting bolts and re-torquing them with the gantry bolted to both carriages, so
+the gantry itself set the parallelism. No drift since.
+
+This is the failure mode to expect on MGN rails. They have almost no compliance,
+so two rails a tenth of a millimetre out of parallel bind the carriages, both
+motors fight it, and the tighter side loses more — drift that is shared but
+unequal. V-wheels would have flexed and absorbed it.
+
+Things that turned out not to be the cause, for the record:
+
+- Y/Y2 auto-squaring was fine — the homing log showed Y2 tripping ~0.018 mm
+  before Y, so the gantry was square at home all along.
+- The stepping engine name parses correctly; FluidNC matches enums
+  case-insensitively, so `I2S_STream` is valid.
+- Acceleration was never aggressive — 150 mm/s² with a 3000 mm/min rapid is
+  0.33 s and 8 mm to reach full speed.
+- The CL57T drivers are closed loop, so they correct position error rather than
+  dropping steps silently. Worth remembering: when they *do* exceed their error
+  limit they fault and assert ALM, which looks exactly like lost steps if ALM is
+  not wired back to the controller.
+
 ## Open
 
-### Dust cover
+### Magazine pitch — confirm pocket 6
 
-See `tool-changer.md`. Removed from the config; the signal spec is undocumented
-and 5 V logic does not drive it. RapidChange's Discord is the place to resolve it.
+The 45.000 mm pitch has not been checked against a far pocket since the Y
+coordinates were re-measured. Pocket 1 is Y85.400, so pocket 6 computes to
+Y310.400. Park there and confirm the spindle is centred.
 
-### Y drifts slightly, unequally between sides
-
-Both sides of the gantry drift over repeated moves, by different amounts.
-
-Ruled out so far:
-
-- Y/Y2 auto-squaring works — the homing log shows Y2 tripping ~0.018 mm before Y,
-  so the gantry is square **at home**. Any racking happens during motion.
-- The stepping engine name parses correctly (FluidNC matches enums
-  case-insensitively, so `I2S_STream` is fine).
-- Acceleration is gentle — 150 mm/s² with a 3000 mm/min rapid is 0.33 s and 8 mm
-  to reach full speed.
-
-Still to check:
-
-- **The CL57T drivers are closed loop.** They correct position error rather than
-  losing steps silently, but they fault and assert their ALM output when error
-  exceeds their limit. If ALM is not wired to the controller, a fault looks
-  exactly like lost steps. This is the first thing to check.
-- Hand-feel test with the machine powered down (`idle_ms: 255` keeps motors
-  energised, so the controller must be off). Uniform stiffness points at
-  lubrication; tight spots point at rail alignment.
-- HGR rails have almost no compliance. Two rails out of parallel by 0.1 mm over
-  1180 mm will bind, and the tighter side loses more — which matches the symptom.
-  Check centre-to-centre at several points, or loosen one rail and let the gantry
-  set the parallelism as you torque from one end.
-- Grease the four HGR carriages — lithium NLGI 2, a few pumps each through the
-  end-cap zerk, then cycle the travel and wipe.
-
-### Magazine pitch
-
-Pocket 1 measured at Y80.6 and pocket 6 was reported at Y306. With a 45.000 mm
-pitch, pocket 6 computes to 305.6. If pocket 6 really wants 306, the pitch is
-45.08 rather than 45.000. Worth settling, because a pitch error and the Y drift
-produce the same symptom at the far pockets.
+An earlier 0.4 mm discrepancy between pockets 1 and 6 was measured while the Y
+rail was still binding, so it is not evidence of a pitch error — but it has not
+been re-checked either.

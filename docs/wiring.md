@@ -15,8 +15,17 @@ This board is set to **5 V**, because the tool changer's sensors need 5 V.
 
 ## Endstops
 
-ROURCK SN04-N inductive, NPN-NO, running at 12 V from the main supply.
-Brown to +12 V, blue to 0 V, black to the input pin.
+ROURCK SN04-N inductive, NPN-NO, running at **5 V**.
+Brown to +5 V, blue to 0 V, black to the input pin.
+
+The `Switch Vcc` jumper is global, and the tool changer's sensors need 5 V, so
+the endstops run at 5 V too — there is no way to have one at 5 V and the other
+at 12 V from the board.
+
+Worth knowing: most SN04-N variants are specified from 6 V up, so 5 V is at or
+just below the bottom of the datasheet range. They work reliably here. If
+endstops ever start behaving erratically, supply voltage is the first thing to
+rule out rather than the last.
 
 | Axis | Pin | Config |
 |---|---|---|

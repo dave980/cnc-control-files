@@ -104,5 +104,6 @@ The signal spec is not published. `user_outputs` is removed from the config and
 the `M64 P1` / `M65 P1` lines are stripped from `tc.nc` and `measuretool.nc`,
 because `M64` on an undefined output errors and aborts the macro.
 
-**Run with the cover removed or secured open.** `tc.nc` drives Z to −105 in the
-magazine and will put a tool through a closed cover.
+**The cover has been physically removed from the magazine**, so there is nothing
+for a tool to hit. If one is ever refitted, it must be driven or secured open
+before running a tool change — `tc.nc` drives Z to −105 in the magazine.

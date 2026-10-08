@@ -18,7 +18,7 @@ tools. Values were measured on the machine, not copied from a template.
 | Logic supply | 12 V |
 | Ball screws | 1605 (5 mm pitch) |
 | Axes | X, Y1, Y2 (auto-squaring gantry), Z |
-| Endstops | ROURCK SN04-N inductive, NPN-NO, run at 12 V |
+| Endstops | ROURCK SN04-N inductive, NPN-NO, run at 5 V |
 | Spindle | HLTNC GDZ80X73-2-2, 2.2 kW air cooled, 24000 rpm / 400 Hz |
 | VFD | YL620-A |
 | Tool changer | RapidChange linear magazine Premium, 6 pockets, ER20 |
@@ -67,11 +67,10 @@ Working:
 - Spindle across the full range, including tool-change speeds
 - M6 tool change — load, unload, IR beam verification, tool setter touch-off
 - Magazine geometry verified at pockets 1 and 6
+- Y position holds — the left rail was out of parallel; loosened and re-torqued
 
-Open:
+Not fitted:
 
-- **Dust cover** — removed from the config. The cover is servo driven through an
-  ATtiny and never responded to a 5 V logic signal; see `docs/troubleshooting.md`.
-  Run with the cover removed or secured open.
-- **Y position drift** — both sides drift slightly unequally over repeated moves.
-  Under investigation; see `docs/troubleshooting.md`.
+- **Dust cover** — physically removed from the magazine. It is servo driven
+  through an ATtiny and never responded to a 5 V logic signal, so it is out of
+  the config and out of the macros. See `docs/tool-changer.md`.
