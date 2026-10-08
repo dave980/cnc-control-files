@@ -29,6 +29,38 @@ corrections do not move it.
 | −82 | Approach, just above the nut |
 | −105 | Full engagement |
 
+## Z geometry
+
+Measured datums, both from the top of the spoil board:
+
+- Bottom of the spindle, no collet, at Z−115: **25 mm**
+- Top of the RapidChange magazine: **50 mm**
+
+So spindle nose height above the spoil board = `25 + (115 + Z)`:
+
+| Z | Nose height | vs magazine top | |
+|---|---|---|---|
+| 0 | 140 mm | +90 mm | safe / traverse |
+| −68 | 72 mm | +22 mm | recognition zone 2 |
+| −74 | 66 mm | +16 mm | recognition zone 1 |
+| −82 | 58 mm | +8 mm | approach |
+| **−90** | **50 mm** | **0 mm** | **clearance plane** |
+| −105 | 35 mm | −15 mm | engagement |
+| −115 | 25 mm | −25 mm | soft limit |
+| −118 | 22 mm | −28 mm | rail end |
+
+**Z−90 is the clearance plane over the magazine.** Above it the spindle passes
+over the magazine freely; below it the nose is inside the magazine's envelope.
+
+This verifies the macro geometrically: every XY move in `tc.nc` happens at Z0,
+and the lowest the axis goes before an XY move is the −82 approach — both above
+−90. The only travel below the clearance plane is the engagement plunge to
+−105, which happens stationary over a pocket. Nothing traverses while the nose
+is down inside the magazine.
+
+Keep −90 in mind for any hand-written G-code that goes near X1211. Crossing that
+plane anywhere other than directly over a pocket is what a crash looks like.
+
 ## Speeds and feeds
 
 | Setting | Value |

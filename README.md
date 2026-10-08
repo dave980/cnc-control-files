@@ -25,7 +25,13 @@ tools. Values were measured on the machine, not copied from a template.
 | Tool changer | RapidChange linear magazine Premium, 6 pockets, ER20 |
 
 Travel: X 1220 mm, Y 1180 mm, Z 115 mm. Z is tight — `tc.nc` reaches −105, so
-there is 10 mm to spare. See `docs/tool-changer.md`.
+there is 10 mm to spare.
+
+At the bottom of Z travel the bare spindle nose sits 25 mm above the spoil
+board, so with an ER20 nut and a tool fitted the tip reaches the board well
+before the soft limit. **The Z soft limit does not protect the spoil board** —
+tool length offsets and work zero do. `docs/tool-changer.md` has the full Z
+geometry and the −90 clearance plane over the magazine.
 
 ## Layout
 
