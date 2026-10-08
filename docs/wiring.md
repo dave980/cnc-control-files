@@ -125,28 +125,50 @@ the limit switches, so the wiring lands next to everything else.
 
 ### Ganging four ALM outputs
 
-The CL57T alarm output is an opto-isolated switch (ALM+ / ALM−), floating and
-independent of the 48 V side, so the outputs can share one controller input.
-**How you combine them depends on which way the switch rests**, and getting it
-backwards gives you an input that looks healthy and never fires:
+Each driver brings out a **single ALM pin**, not an ALM+ / ALM- pair. So the
+alarm is a single-ended output returning through the driver's signal common —
+the same common the step and direction pairs already share with the Doberman.
+There is no floating contact to work with.
 
-| ALM behaviour | Wire them | Config |
+**That rules out a series chain.** Four single-ended outputs referenced to one
+common can only be paralleled:
+
+- all four ALM pins to gpio.37's signal pin
+- driver signal common tied to the input header GND (it already is, through the
+  step/dir return)
+
+Parallel wired-OR is the right behaviour — any one driver asserting pulls the
+input — but it has a cost worth stating plainly.
+
+**It fails silent.** A broken ALM wire or a connector knocked off removes that
+driver's protection with no indication at all; the input sits healthy and
+nothing ever fires. With a floating contact a series chain would have caught
+that, because an open loop is itself an alarm. Single-ended, there is no
+fail-safe arrangement available. The protection is therefore only as good as
+the last time it was tested — so test it deliberately, and re-test after any
+work in the cabinet.
+
+#### Polarity must be measured, not assumed
+
+Published descriptions of this output disagree with each other, so measure.
+With the drivers powered and idle, meter resistance from one ALM pin to the
+driver's signal common:
+
+| Idle reading | Output | Config |
 |---|---|---|
-| Closes on alarm (NO) | **parallel** — all ALM+ to gpio.37 signal, all ALM− to input GND | `fault_pin: gpio.37:low` |
-| Opens on alarm (NC) | **series** — a daisy chain from gpio.37 signal through each driver to GND | `fault_pin: gpio.37` |
+| Open / high | Open-collector, pulls low on alarm | `fault_pin: gpio.37:low` |
+| Near short | Conducting when healthy, releases on alarm | see below |
 
-Parallel on a normally-open output ORs them: any one driver alarming pulls the
-input low. Parallel on a normally-*closed* output would AND them instead, and
-all four would have to fault before anything happened.
+Then force an alarm on that one driver — unplug its encoder and command a short
+move — and re-measure. Two readings on one driver settle it for all four.
 
-**Prefer series/NC if the driver supports it.** A series chain is fail-safe — a
-broken wire or a pulled connector opens the loop and raises the alarm. A
-parallel NO arrangement fails silent: lose a wire and you lose the protection
-without any indication.
-
-Check which you have before wiring: meter across one driver's ALM+ / ALM− with
-the machine powered and idle. Continuity means normally-closed, open means
-normally-open.
+**If it turns out to be active high** — sourcing on alarm rather than sinking —
+it cannot drive gpio.37 directly. The opto input has an onboard pull-up and
+expects to be pulled *down*; a sourcing output just fights the pull-up and
+nothing happens. That case needs one inverting stage: each ALM through a signal
+diode (1N4148) into a shared base resistor, a small NPN with its emitter to
+GND and its collector on gpio.37. The diodes keep the four outputs from
+back-feeding each other.
 
 ### Testing it
 

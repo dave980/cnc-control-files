@@ -127,9 +127,10 @@ that exceeds its position-error limit faults and asserts ALM, and from the
 controller's side that is indistinguishable from lost steps — which is exactly
 the symptom that was chased above.
 
-Plan is in `wiring.md`: `control: fault_pin: gpio.37:low`. Meter one driver's
-ALM+/ALM- first — continuity when idle means normally-closed, which wants a
-series chain and no `:low`.
+Plan is in `wiring.md`: `control: fault_pin: gpio.37:low`. The drivers have a
+single ALM pin rather than a floating pair, so the four get paralleled and
+there is no fail-safe series option — meter one driver idle and again under a
+forced alarm to settle the polarity before wiring.
 
 ### The E-stop is not signalled to FluidNC
 
