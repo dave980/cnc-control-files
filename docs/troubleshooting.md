@@ -108,6 +108,12 @@ Z — only the home switch at the top and `hard_limits: true` are doing any work
 `tc.nc` reaches Z−105, so whatever the figure is, it has to exceed that
 comfortably. Measure from the home switch to the lowest safe position and set it.
 
+Worth measuring rather than assuming, because Z travel here may be tighter than
+it looks. The SFU1605 screw is 350 mm, but the rails are only 300 mm and each
+rail carries two HGH20CA blocks at roughly 77 mm apiece. Once the block span and
+end clearance come off, usable travel could land not far above the 105 mm the
+tool changer needs. The rails, not the screw, are the limiting part.
+
 ### Magazine pitch — confirm pocket 6
 
 The 45.000 mm pitch has not been checked against a far pocket since the Y
