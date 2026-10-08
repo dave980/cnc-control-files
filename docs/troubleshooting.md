@@ -78,10 +78,10 @@ Both sides of the gantry drifted over repeated moves, by different amounts.
 mounting bolts and re-torquing them with the gantry bolted to both carriages, so
 the gantry itself set the parallelism. No drift since.
 
-This is the failure mode to expect on MGN rails. They have almost no compliance,
-so two rails a tenth of a millimetre out of parallel bind the carriages, both
-motors fight it, and the tighter side loses more — drift that is shared but
-unequal. V-wheels would have flexed and absorbed it.
+This is the failure mode to expect on HGR20 profile rails. They have almost no
+compliance, so two rails a tenth of a millimetre out of parallel bind the
+carriages, both motors fight it, and the tighter side loses more — drift that is
+shared but unequal. V-wheels would have flexed and absorbed it.
 
 Things that turned out not to be the cause, for the record:
 

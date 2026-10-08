@@ -16,7 +16,8 @@ tools. Values were measured on the machine, not copied from a template.
 | Drivers | CL57T v4.0 closed loop |
 | Motor supply | 48 V |
 | Logic supply | 12 V |
-| Ball screws | 1605 (5 mm pitch) |
+| Rails (X, Y) | VEVOR HGR20, 1500 mm |
+| Ball screws | RM1605, 1500 mm, BF12/BK12 end supports — 5 mm pitch |
 | Axes | X, Y1, Y2 (auto-squaring gantry), Z |
 | Endstops | ROURCK SN04-N inductive, NPN-NO, run at 5 V |
 | Spindle | HLTNC GDZ80X73-2-2, 2.2 kW air cooled, 24000 rpm / 400 Hz |
