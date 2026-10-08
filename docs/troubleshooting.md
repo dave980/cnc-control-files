@@ -103,8 +103,12 @@ FluidNC's default and the bottom of the axis had no soft limit. Z has only a
 positive (top) limit switch, so soft limits are the *only* protection at the
 bottom.
 
-Measured travel from the home switch is **115 mm**, now set as
-`max_travel_mm: 115.000`.
+Measured from the home switch, **Z−118 puts the bottom of the carriage level
+with the bottom of the rail** — past that the carriage starts to overhang the
+rail end, which on a profile rail means the balls lose support and can escape.
+
+`max_travel_mm: 115.000` is set from that, keeping a 3 mm buffer before any
+overhang.
 
 That leaves 10 mm of clearance below the Z−105 the tool changer plunges to. It
 works, but it is the tightest margin on the machine — see `tool-changer.md`.
