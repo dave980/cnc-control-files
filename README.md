@@ -95,8 +95,16 @@ Working:
 - Homing on all axes, Y/Y2 auto-squaring
 - Spindle across the full range, including tool-change speeds
 - M6 tool change — load, unload, IR beam verification, tool setter touch-off
-- Magazine geometry verified at pockets 1 and 6
+- Magazine verified at **all six pockets** over repeated changes
 - Y position holds — the left rail was out of parallel; loosened and re-torqued
+
+Not wired yet:
+
+- **CL57T ALM outputs** — the drivers have alarm outputs and nothing reads
+  them, so a driver faulting on position error looks like lost steps. Plan for
+  `fault_pin: gpio.37` is in `docs/wiring.md`.
+- **E-stop signal to FluidNC** — the switch is hardwired and cuts power, but the
+  controller never hears about it. Hence `$H` after every E-stop.
 
 Not fitted:
 

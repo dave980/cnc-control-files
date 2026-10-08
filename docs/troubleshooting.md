@@ -113,14 +113,38 @@ overhang.
 That leaves 10 mm of clearance below the Z−105 the tool changer plunges to. It
 works, but it is the tightest margin on the machine — see `tool-changer.md`.
 
+### Magazine pitch — settled
+
+The 45.000 mm pitch and the Y85.400 base are confirmed: all six pockets have
+been exercised over repeated tool changes.
+
+The 0.4 mm discrepancy noticed earlier between pockets 1 and 6 was measured
+while the Y rail was still binding, so it was never a pitch error — it was the
+drift. Fixing the rail removed it.
+
 ## Open
 
-### Magazine pitch — confirm pocket 6
+### CL57T alarm outputs are not read by the controller
 
-The 45.000 mm pitch has not been checked against a far pocket since the Y
-coordinates were re-measured. Pocket 1 is Y85.400, so pocket 6 computes to
-Y310.400. Park there and confirm the spindle is centred.
+The four drivers have ALM outputs and nothing is connected to them. A driver
+that exceeds its position-error limit faults and asserts ALM, and from the
+controller's side that is indistinguishable from lost steps — which is exactly
+the symptom that was chased above.
 
-An earlier 0.4 mm discrepancy between pockets 1 and 6 was measured while the Y
-rail was still binding, so it is not evidence of a pitch error — but it has not
-been re-checked either.
+Plan is in `wiring.md`: `control: fault_pin: gpio.37:low`. Meter one driver's
+ALM+/ALM- first — continuity when idle means normally-closed, which wants a
+series chain and no `:low`.
+
+### The E-stop is not signalled to FluidNC
+
+The hardwired switch cuts motor and spindle power but leaves the Doberman
+running, so the controller keeps a stale position and nothing alarms. `$H`
+after every E-stop is the workaround. `estop_pin` from a spare contact would
+make it a real alarm. See `wiring.md`.
+
+### VFD parameters not yet dumped
+
+`tools/vfd_dump.py` is written and read-only but has not been run — waiting on
+the SH-U11F adapter and a 3-pin pigtail. First read should be P00.04 returning
+4000, which confirms the 0.1 Hz scaling holds across the register space and not
+just the handful of parameters set by hand.
