@@ -87,6 +87,28 @@ closed-loop feedback.
 The other half carries SPNDL and TOOL CHNG — the 5-wire magazine harness lands
 on that one.
 
+## The hardware
+
+![Control cabinet](images/control-cabinet.jpg)
+
+Cabinet, roughly top left to bottom right: Meanwell XDR-960E-48 (48 V, 20 A)
+for the motors, the CL57T closed-loop drivers below it, Lawlron NDR-120-12
+(12 V, 10 A) for logic, and the YL620-A VFD across the bottom. The Doberman is
+to the left of the VFD.
+
+![Doberman board](images/doberman-board.jpg)
+
+![Breakout panel - STEP, E-STOP, ENCODER](images/breakout-step-estop-encoder.jpg)
+
+Machine-side wiring lands on a breakout panel rather than at the board
+directly. STEP per axis (X, Y1, Y2, Z), E-STOP, and ENCODER for the CL57T
+closed-loop feedback.
+
+![Breakout panel - spindle and tool change](images/breakout-spindle-toolchange.jpg)
+
+The other half carries SPNDL and TOOL CHNG. The 5-wire magazine harness lands
+on that one.
+
 ## Doberman outputs, for reference
 
 Four 5 V outputs on red 2-pin connectors, driven by a 74AHCT125 — true push-pull

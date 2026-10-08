@@ -36,6 +36,11 @@ corrections do not move it.
 Six pockets in a line along Y, tool setter at the near end. The spindle nose is
 at the top of its travel here, which is 90 mm clear of the magazine.
 
+![Spindle at the magazine](images/spindle-and-magazine.jpg)
+
+Six pockets in a line along Y with the tool setter at the near end. The spindle
+is near the top of its travel here, about 90 mm clear of the magazine.
+
 ## Z geometry
 
 Measured datums, both from the top of the spoil board:

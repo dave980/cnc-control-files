@@ -9,6 +9,8 @@ tools. Values were measured on the machine, not copied from a template.
 
 ![The mill, spindle over the RapidChange magazine](docs/images/spindle-and-magazine.jpg)
 
+![The mill](docs/images/machine-overview.jpg)
+
 ## Machine
 
 | Item | Detail |
@@ -47,6 +49,7 @@ docs/vfd-yl620a.md              VFD parameters and speed calibration
 docs/tool-changer.md            ATC coordinates, sequence, recovery
 docs/troubleshooting.md         problems hit during commissioning and what fixed them
 docs/deploying.md               getting files onto the controller
+docs/images/                    photos of the machine and the wiring
 docs/images/                    photos of the machine and the wiring
 tools/deploy.sh                 upload config and macros over the network
 tools/deploy.ps1                the same, for Windows PowerShell
