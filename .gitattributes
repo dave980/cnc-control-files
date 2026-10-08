@@ -1,0 +1,7 @@
+# Keep LF in the repo. FluidNC's InputFile::readLine skips \r so CRLF would
+# work on the controller, but LF keeps diffs clean across machines.
+*.nc    text eol=lf
+*.yaml  text eol=lf
+*.sh    text eol=lf
+*.md    text eol=lf
+*.ps1   text eol=crlf

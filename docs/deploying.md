@@ -15,6 +15,53 @@ Three ways to arrange that, in order of how much machinery they need:
 | Git hook | `post-merge` hook calling the script | Deploy on every `git pull` |
 | Self-hosted runner | GitHub Actions runner on a LAN machine | Deploy on every push to `main` |
 
+## On Windows
+
+The repo clones to something like
+`C:\Users\<you>\Documents\GitHub\cnc-control-files`. Two options:
+
+**Git Bash** — run `tools/deploy.sh` unchanged. Git for Windows ships bash and
+curl, so nothing extra is needed.
+
+**PowerShell** — run `tools\deploy.ps1`, which does the same thing using
+`curl.exe` (included in Windows 10 1803 and later):
+
+```
+.\tools\deploy.ps1 -Board 192.168.0.23
+.\tools\deploy.ps1 -Board 192.168.0.23 -Restart
+```
+
+If PowerShell refuses to run it, the execution policy is blocking local
+scripts. Either unblock the file or run it for one session only:
+
+```
+powershell -ExecutionPolicy Bypass -File .\tools\deploy.ps1 -Board 192.168.0.23
+```
+
+### Do not keep this repo in OneDrive
+
+A git repository inside a OneDrive folder is a known source of trouble.
+OneDrive syncs the `.git` directory itself, so it can upload loose objects and
+index files mid-operation, produce `cnc-control-files-DESKTOP-xxx` conflicted
+copies, and with Files On-Demand it can leave files as cloud placeholders that
+tools see as empty. Microsoft's own guidance is not to sync dev repos.
+
+Move it somewhere outside OneDrive:
+
+```
+C:\Users\<you>\GitHub\cnc-control-files
+```
+
+Clone it fresh there rather than dragging the folder, so nothing carries over
+half-synced state. For a config repo controlling a machine with a 2.2 kW
+spindle, a silently corrupted checkout is not a risk worth running.
+
+### Line endings
+
+Git on Windows checks out CRLF by default. That happens to be harmless here —
+FluidNC's `InputFile::readLine` skips `\r` outright, so CRLF macros run fine —
+but `.gitattributes` pins LF anyway to keep diffs clean between machines.
+
 ## tools/deploy.sh
 
 ```

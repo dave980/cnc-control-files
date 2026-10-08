@@ -46,6 +46,7 @@ docs/tool-changer.md            ATC coordinates, sequence, recovery
 docs/troubleshooting.md         problems hit during commissioning and what fixed them
 docs/deploying.md               getting files onto the controller
 tools/deploy.sh                 upload config and macros over the network
+tools/deploy.ps1                the same, for Windows PowerShell
 ```
 
 ## Installation
