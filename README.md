@@ -24,7 +24,7 @@ tools. Values were measured on the machine, not copied from a template.
 | VFD | YL620-A |
 | Tool changer | RapidChange linear magazine Premium, 6 pockets, ER20 |
 
-Travel: X 1220 mm, Y 1180 mm, Z 115 mm. Z is tight — `tc.nc` reaches −105, so
+Travel: X 1220 mm, Y 1200 mm, Z 115 mm. Z is tight — `tc.nc` reaches −105, so
 there is 10 mm to spare.
 
 At the bottom of Z travel the bare spindle nose sits 25 mm above the spoil

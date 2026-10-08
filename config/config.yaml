@@ -41,7 +41,7 @@ axes:
     steps_per_mm: 320.000
     max_rate_mm_per_min: 3000.0
     acceleration_mm_per_sec2: 150.0
-    max_travel_mm: 1180.000
+    max_travel_mm: 1200.000
     homing:
       cycle: 2                    # Two motors with individual limits: auto-squaring on homing
       positive_direction: false
