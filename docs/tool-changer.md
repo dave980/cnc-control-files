@@ -1,7 +1,9 @@
 # RapidChange ATC
 
-Premium linear magazine, 6 pockets, ER20. Driven by `macros/tc.nc` through
-FluidNC's `m6_macro` hook — not the greilick-industries firmware fork, which is a
+Premium linear magazine, 6 pockets, ER20. `macros/tc.nc` began as RapidChange's
+generated macro (see
+[rvalotta/RapidChangeATC_FluidNC_M6_Macro](https://github.com/rvalotta/RapidChangeATC_FluidNC_M6_Macro))
+and is modified for this machine. Driven through FluidNC's `m6_macro` hook — not the greilick-industries firmware fork, which is a
 separate approach that replaces the macro entirely and has no `m6_macro` support.
 
 ## Coordinates

@@ -117,3 +117,23 @@ Also standing on:
 - [FluidNC](https://github.com/bdring/FluidNC) and the Doberman board — Bart Dring
 - [RapidChange ATC](https://rapidchangeatc.com/) — the tool changer
 - [RapidChangeATC_FluidNC_M6_Macro](https://github.com/rvalotta/RapidChangeATC_FluidNC_M6_Macro) — Ryan Valotta, the basis for `tc.nc`
+
+## Credits
+
+**Machine design — [LienCNC V2](https://github.com/eclsnowman/LienCNC-V2) by Eric
+Lien (eclsnowman).** This mill is built largely to that design. The repo holds
+the SolidWorks files, prints, BOM and component manuals; the README invites
+people to build from it or use it as a jumping-off point, which is exactly what
+happened here. Everything in *this* repo is the control side — config, macros
+and commissioning notes — none of which came from there, and none of Eric's
+files are redistributed here.
+
+**Tool change macros — RapidChange ATC, via
+[rvalotta/RapidChangeATC_FluidNC_M6_Macro](https://github.com/rvalotta/RapidChangeATC_FluidNC_M6_Macro).**
+`tc.nc`, `measuretool.nc` and `findzposition.nc` started as RapidChange's
+generated macros and have been modified for this machine: coordinates measured
+on the hardware, the dust cover calls removed, probe seek raised to F600.
+
+Neither upstream project states a license, so this repo carries none either —
+adding one would imply rights over the macro structure that are not mine to
+grant.
