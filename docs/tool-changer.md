@@ -110,6 +110,50 @@ Unload:
 3. Plunge Z−105, retract Z−93 — unthreads
 4. Z−74, read beam — must be **clear**
 
+## How tool length offsets work
+
+The tool setter's height is never measured and never stored. It does not need
+to be, and understanding why explains what can break it.
+
+```
+G38.2 G91 Z-75.000 F600.0    seek down fast until the setter trips
+G38.4 G91 Z10.000  F50.0     back off slowly until it releases
+G43.1 Z[#5063]               tool length offset = that position
+```
+
+`#5063` is the probe trip position. FluidNC fills `#5061`-`#5066` from
+`steps_to_mpos()`, so it is in **machine** coordinates — the active work offset
+cannot leak into the tool length offset.
+
+At the moment of trip the tool *tip* sits at some fixed machine height, call it
+T, which is a property of the setter and identical for every tool. The spindle
+nose is then at `T + L` for a tool projecting L below the nose, so the offset
+stored is `T + L`.
+
+T is unknown and the stored offset is therefore "wrong" — but wrong by the same
+constant for every tool, so tool-to-tool differences are exact. The constant
+vanishes when work Z zero is touched off: it is absorbed into the G54 Z offset,
+and from then on every probed tool puts its tip in the same place.
+
+Accuracy comes from the F50 back-off, not the F600 seek. The seek only has to
+land somewhere past the trip point.
+
+### What breaks it
+
+- **Touching off work Z zero without a measured tool.** The constant only
+  cancels if a tool length offset was active when Z zero was set. Set it with
+  no offset, or a stale one, and every tool afterwards is out by the difference.
+- **Moving the setter.** Its height is baked into every work offset set since.
+  Re-shim it, knock it, or remount the magazine and all existing work Z zeros
+  are wrong by that amount, with nothing to indicate it.
+
+Sanity check: the offset is negative, roughly -50 to -80 here, and a **longer**
+tool gives a **less** negative value because it trips the setter sooner. A
+longer tool reading more negative means something is inverted.
+
+`findzposition.nc` is unrelated to any of this — it creeps up at F250 until the
+IR beam breaks, to establish the magazine's tool recognition zones.
+
 ## Failure recovery
 
 The macro uses `$Alarm/Send=3` as its abort signal. Alarm 3 is named "Reset while
