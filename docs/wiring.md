@@ -125,31 +125,27 @@ the limit switches, so the wiring lands next to everything else.
 
 ### Ganging four ALM outputs
 
-Each driver brings out a **single ALM pin**, not an ALM+ / ALM- pair. So the
-alarm is a single-ended output returning through the driver's signal common —
-the same common the step and direction pairs already share with the Doberman.
-There is no floating contact to work with.
+Each driver brings out a **single ALM pin**, not a floating ALM+ / ALM- pair.
+The alarm is an open-collector output returning through **COM-**, which is its
+own terminal on the control connector — not the step/direction return, and not
+anything already wired. It needs a wire of its own.
 
-**That rules out a series chain.** Four single-ended outputs referenced to one
-common can only be paralleled:
+Two consequences follow, and both are settled by measurement rather than by
+choosing an approach up front:
 
-- all four ALM pins to gpio.37's signal pin
-- driver signal common tied to the input header GND (it already is, through the
-  step/dir return)
+- **A series chain is impossible.** Four common-emitter outputs sharing COM-
+  cannot be daisy-chained. Parallel is the only wiring-only option.
+- **Whether parallel even works depends on which way the output rests.** If it
+  conducts on alarm, paralleling ORs them and all is well. If it conducts when
+  healthy, paralleling ANDs them and the arrangement is useless. Establish this
+  on one driver before wiring four.
 
-Parallel wired-OR is the right behaviour — any one driver asserting pulls the
-input — but it has a cost worth stating plainly.
-
-**If the output conducts on alarm, it fails silent.** A broken ALM wire or a
-connector knocked off removes that driver's protection with no indication; the
-input sits healthy and nothing ever fires. A series chain of floating contacts
-would have caught that, because an open loop is itself an alarm — but
-common-emitter outputs sharing COM- cannot be chained. So the protection is
-only as good as the last time it was tested. Test it deliberately, and re-test
-after any work in the cabinet.
-
-Which way the output rests decides this, and it also decides whether paralleling
-works at all — see below before wiring.
+If it conducts on alarm, the arrangement **fails silent**: a broken ALM wire or
+a connector knocked off removes that driver's protection with no indication, and
+the input sits healthy forever. A series chain of floating contacts would have
+caught that, because an open loop is itself an alarm — but that option does not
+exist here. So the protection is only as good as the last time it was tested.
+Test it deliberately, and re-test after any work in the cabinet.
 
 #### The driver's connectors
 
