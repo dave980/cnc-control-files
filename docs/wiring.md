@@ -200,43 +200,40 @@ than adding four parallel return paths through the ALM harnesses. Four COM-
 wires running alongside motor cables is a ground loop with motor current in it,
 and that is how a perfectly good endstop starts behaving the way the Z one did.
 
-#### Polarity must be measured, not assumed
+#### Establishing which way ALM rests
 
-The label gives the pinout but not the sense, and published descriptions of
-this output contradict each other. With the drivers powered and idle, meter
-resistance from one ALM pin to COM-:
+This decides whether paralleling works at all, so it comes before wiring all
+four.
 
-| Idle reading | Output | Config |
-|---|---|---|
-| Open / high | Open-collector, pulls low on alarm | `fault_pin: gpio.37:low` |
-| Near short | Conducting when healthy, releases on alarm | see below |
+**A meter will not tell you.** ALM is an open collector — a transistor that
+either ties ALM to COM- or leaves it floating — and floating reads as no
+particular voltage with nothing pulling it up. An ohmmeter on a powered circuit
+is no better. The pull-up needed is the one already on gpio.37, so wire one
+driver and let the firmware read it.
 
-Then force an alarm on that one driver — unplug its encoder and command a short
-move — and re-measure. Two readings on one driver settle it for all four.
+1. **Wire one driver only.** COM- to the input header GND, ALM to gpio.37's
+   signal pin.
+2. **Read it as an ordinary input, not as a fault.** Temporarily add
+   `user_inputs: digital1_pin: gpio.37:low` alongside the existing IR beam on
+   digital0. With the machine healthy, `M66 P1 L0` and note `#5399`.
+3. **Force an alarm on that driver.** Unplug its encoder and power-cycle it —
+   many closed-loop drivers fault on encoder loss with no motion at all, so
+   look for the red PWR/ALM LED first. If it does not fault, command a short
+   slow move on that axis. Then `M66 P1 L0` again.
 
-The red PWR/ALM LED on the driver is the cross-check — it should agree with
-whichever state the meter calls the alarm.
+| Healthy | Alarmed | Output | Consequence |
+|---|---|---|---|
+| 0 | 1 | Conducts on alarm | Parallel all four, `fault_pin: gpio.37:low` |
+| 1 | 0 | Conducts when healthy | Parallel **ANDs** — needs a PC817 per driver |
 
-Sinking is certain — COM- is the emitter common, so the transistor can only
-pull ALM down toward it. The open question is which way it rests.
+Test through `user_inputs` rather than `fault_pin` because `fault_pin` raises a
+*critical* alarm that only a soft reset clears, and a soft reset sets
+`current_tool` back to -1. Reading it as a plain input can be repeated as often
+as needed without locking the machine or re-doing `M61`.
 
-**Conducts on alarm (open when idle)** is the straightforward case and the
-expected one: `fault_pin: gpio.37:low`, four ALM pins in parallel, done.
-
-**Conducts when healthy (near short when idle)** breaks the parallel
-arrangement, and it is worth understanding why before wiring. On its own that
-sense is the better one — the pin rests low and goes high on alarm, so a broken
-wire *raises* the alarm, which is the fail-safe behaviour a series chain would
-have given. But four of them in parallel **AND** rather than OR: one driver
-alarming opens its transistor while the other three still hold the pin low, so
-all four would have to fault before anything fired. Exactly the trap that
-parallel-wiring a normally-closed contact sets.
-
-There is no wiring-only fix for that case, because common-emitter outputs
-sharing COM- cannot be chained in series. It needs a device per driver — four
-PC817 optocouplers, each LED driven by one ALM, all four transistors paralleled
-onto gpio.37. That also settles the COM- grounding question, since each
-driver's output side stays isolated from the Doberman's.
+Once the sense is known, drop the temporary `digital1_pin`, wire the remaining
+three, and move gpio.37 to `control: fault_pin:` with the polarity the test
+gave.
 
 ### Testing it
 
