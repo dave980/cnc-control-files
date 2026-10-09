@@ -118,6 +118,22 @@ works, but it is the tightest margin on the machine — see `tool-changer.md`.
 The 45.000 mm pitch and the Y85.400 base are confirmed: all six pockets have
 been exercised over repeated tool changes.
 
+### Tool broken on the setter after the first M6 of a program
+
+The macro handed control back with the spindle parked over the tool setter, and
+the program's next line was `G0 Z0.8` — a work-coordinate Z move. The tool was
+driven back down into the setter at rapid and broke, along with the setter.
+
+The probe itself worked correctly; the light touch seen first was the probe
+cycle doing its job.
+
+Only the *first* tool change in a Vectric file is exposed, because that is the
+only one where the post emits a Z move before an XY move. Hand-running `M6`
+never reproduced it.
+
+Fixed by having `tc.nc` and `measuretool.nc` return to their starting XY in
+machine coordinates before finishing. Full write-up in `tool-changer.md`.
+
 ## Open
 
 ### CL57T alarm outputs are not read by the controller

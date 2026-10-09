@@ -154,6 +154,59 @@ longer tool reading more negative means something is inverted.
 `findzposition.nc` is unrelated to any of this — it creeps up at F250 until the
 IR beam breaks, to establish the magazine's tool recognition zones.
 
+## The macro must not end over the tool setter
+
+**This broke a tool and the setter on 2026-10-08.** It is the most dangerous
+interaction found on this machine, and it is invisible in hand testing.
+
+The macro used to finish with `G53 G90 G0 Z0.000` and hand control back with
+the spindle still parked at X1211.000 Y32.000 — directly over the tool setter.
+That is safe in itself, since machine Z0 is 140 mm above the spoil board. The
+danger is the **next line of the program**.
+
+Vectric emits an initial Z retract at the top of a file, so the first tool
+change comes out as:
+
+```
+M6 T1
+G0Z0.8000        <- work-coordinate Z move, still over the setter
+G0X0.0000Y0.0000 <- only now does it move away
+```
+
+Z+0.8 inch is 20.3 mm above the work surface. On a 19 mm board that is about
+39 mm above the spoil board, and the magazine top alone is 50 mm. The tool is
+commanded to a height *below* the thing it is standing on, and gets there at
+rapid.
+
+Every later tool change in the same file is safe, because Vectric emits XY
+before Z for those. Only the first one carries the trap, which is why hand
+testing `M6` never reproduced it — nothing followed with a work-coordinate Z
+move.
+
+**Fix: the macro now returns to where it started.** `tc.nc` and
+`measuretool.nc` record `#<_abs_x>` / `#<_abs_y>` before any motion and finish
+with a `G53` move back:
+
+```
+G53 G90 G0 Z0.000
+G53 G90 G0 X[#<_rc_start_x>] Y[#<_rc_start_y>]
+```
+
+Machine coordinates deliberately, not work. `#<_x>` would have worked too, but
+a `G53` return stays geometrically correct even if the work offset is wrong —
+and a wrong work offset is exactly the condition under which the next move is
+dangerous.
+
+This is a macro-side fix on purpose. Correcting the post would fix one post;
+any CAM that emits a Z move before an XY move after `M6` sets the same trap.
+
+### The general rule
+
+**After `M6`, the first move must be XY, not Z.** If you ever write G-code by
+hand or change post processors, check that. The machine cannot protect you here
+— the soft limit at Z-115 is a machine-coordinate limit and the descent was
+well inside it.
+
 ## Failure recovery
 
 The macro uses `$Alarm/Send=3` as its abort signal. Alarm 3 is named "Reset while

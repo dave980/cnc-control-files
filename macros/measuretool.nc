@@ -6,6 +6,8 @@ o1000 if [#<_current_tool> GT 0]
         #<_rc_return_units> = 21
     o1100 endif
     G21 G90
+    #<_rc_start_x> = #<_abs_x>
+    #<_rc_start_y> = #<_abs_y>
     G4 P0.5
     G53 G90 G0 Z0.000
     G43.1 Z0
@@ -17,6 +19,7 @@ o1000 if [#<_current_tool> GT 0]
     G38.4 G91 Z10.000 F50.0
     G43.1 Z[#5063]
     G53 G90 G0 Z0.000
+    G53 G90 G0 X[#<_rc_start_x>] Y[#<_rc_start_y>]
     G4 P0
     G[#<_rc_return_units>]
 o1000 else
