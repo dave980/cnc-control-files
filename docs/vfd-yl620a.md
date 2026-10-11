@@ -103,6 +103,42 @@ speed_map: 0=0.000% 24000=100.000%
 
 Linear. All the shaping happens in the VFD.
 
+## Fault codes
+
+From the YL-620 manual. Worth knowing that manual names parameters `P9-01`,
+`PA-26`, `PD` group — a different convention from this drive's `Pgg.ii`, so it
+covers the wider family rather than this exact unit. The codes have matched so
+far.
+
+| Code | Meaning |
+|---|---|
+| Err01 | Inverter unit protection — output short, module overheat |
+| Err02 | Overcurrent during acceleration |
+| Err03 | Overcurrent during deceleration |
+| Err04 | Overcurrent at constant speed |
+| Err05 / 06 / 07 | Overvoltage during accel / decel / constant speed |
+| Err08 | Control power fault |
+| Err09 | Undervoltage |
+| Err10 | **Inverter** overload |
+| Err11 | **Motor** overload — first listed cause is a wrong overload parameter |
+| Err12 | Input phase loss |
+| Err13 | Output phase loss — check the leads to the spindle |
+| Err14 | Module overheating |
+| Err15 | External fault on a multi-function input |
+| Err16 | Communication failure |
+| Err18 | Current detection fault |
+| Err19 | Motor tuning fault |
+| Err21 | EEPROM read/write failure |
+| Err23 | Motor short to ground |
+| Err30 | Offload — running current below the set floor |
+| Err40 | Fast current limit; load too large or motor blocked |
+| Err45 | Motor over temperature |
+| Err51 | Initial position error — *check rated current is not set too low* |
+
+Err10 and Err11 are different things and the distinction matters: Err10 is the
+drive protecting itself, Err11 is the drive protecting the motor using P12.00
+and P01.05. Err51's note is the same trap from another direction.
+
 ## Reading the parameters back off the drive
 
 `tools/vfd_dump.py` reads every parameter over Modbus RTU and writes them to a
@@ -288,26 +324,45 @@ Tried on 2026-10-10 and reverted. The panel did read 6.0, which at least
 **settles the 0.1 A scaling** for this parameter — it had been inferred from
 P12.05 rather than documented.
 
-**Why it fails.** P12.00 is not just a thermal threshold. The drive's current
-limits are percentages *of* it:
+**The drive said `Err11` — motor overload.** Not an overcurrent trip; the
+overload *model*. P12.00 is the current that model measures against, and
+P01.05 is the threshold as a percentage of it:
 
 | | Against 15.0 A | Against 6.0 A |
 |---|---|---|
-| P01.03 accel overcurrent prevention, 140 % | 21 A | 8.4 A |
-| P01.04 overcurrent, 200 % | 30 A | 12 A |
+| P01.05 overload protection, 130 % | 19.5 A | **7.8 A** |
+| P01.06 overload protection time | 120 s | 120 s |
 
-An induction motor draws several times its rated current to break away. At
-8.4 A the drive clamps before the spindle develops starting torque, so it
-never turns. Changing P12.00 moves four protection limits at once, which is
-the part that was missed when this was first recommended.
+A 2.2 kW induction spindle draws well past 7.8 A getting moving, so the
+overload trips before it is turning. Changing P12.00 moves every limit derived
+from it, which is what was missed when this was first recommended — it was
+treated as one threshold rather than the scaling base for the group.
 
-**The underlying problem is still real.** At 15.0 A the thermal overload
-cannot protect a 6 A spindle, and that matters most during low-speed nut
-threading, where the V/F boost pushes current through windings the rotor fan
-is barely cooling. The fix is not a single parameter — it needs the starting
-limits raised in percentage terms as P12.00 comes down, so the absolute
-breakaway allowance is preserved while the thermal figure gets closer to the
-nameplate. Not attempted yet.
+**A latched fault survives the revert.** After putting P12.00 back, clear the
+fault (power-cycle the VFD) or the spindle stays dead and it looks as though
+the revert did not work.
+
+**The underlying problem is still real.** At 15.0 A the overload cannot
+protect a 6 A spindle, and that matters most during low-speed nut threading,
+where the V/F boost pushes current through windings the rotor fan is barely
+cooling.
+
+But the drive's overload model is too crude to both let a boosted low-speed
+start happen and protect a 6 A motor, because one percentage governs both.
+Raising P01.05 to allow the start raises the sustained trip point by the same
+proportion, which gives most of the protection back.
+
+The honest options, none yet attempted:
+
+- **An intermediate P12.00.** Something like 90-100 (9-10 A) tightens the
+  overload meaningfully from 15 A without starving the start. Crude, but it
+  moves in the right direction and is one parameter.
+- **Measure first.** A clamp meter on one spindle lead during a start and
+  during nut threading gives the actual numbers, and then P12.00 and P01.05
+  can be chosen rather than guessed. This is the one worth doing.
+
+Until then the heat warning above stays advisory: do not leave the spindle
+turning slowly for minutes.
 
 Until then the heat warning above stays advisory: do not leave the spindle
 turning slowly for minutes.
