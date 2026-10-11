@@ -155,6 +155,60 @@ Comms settings on this drive, which are the script's defaults:
 | P03.01 | 10 | Slave address |
 | P03.02 | 2 | 8 data bits, 1 stop, no parity |
 
+### Writing parameters back
+
+`tools/vfd_set.py` writes parameters. It is a **separate script from
+`vfd_dump.py` on purpose** — the dump tool issues nothing but function code 03
+and therefore cannot alter the drive, and that property is worth keeping
+provable rather than merging away.
+
+```
+python tools/vfd_set.py --port COM3 --set P12.00=80
+python tools/vfd_set.py --port COM3 --restore docs/vfd-parameters.md --dry-run
+```
+
+Every write is function 06 for a single register, followed by a function 03
+read of that same register to confirm the value took. Nothing is written blind,
+and a mismatch exits non-zero. This matters more than it sounds: a drive that
+refuses a write — because it is running, or locked — may still echo the request
+as though it succeeded. Only the read-back catches that.
+
+#### The dump is not a config file
+
+Pushing `vfd-parameters.md` back wholesale would be a mistake, which is why
+`--restore` diffs rather than replays. The file mixes three kinds of thing:
+
+- **Settings**, which are writable.
+- **P11.xx live readings** — output current, frequency, heatsink temperature.
+  Restoring these means writing a snapshot of a temperature into a read-only
+  register.
+- **P13.xx identity** — software and hardware version, manufacture date.
+
+And one live wire: **P00.13 is the parameter lock, where value 10 means
+restore factory defaults.** It sits in the middle of that file and it is
+writable. A bulk push-back that ever carried a 10 there — a typo, a bad merge,
+one corrupted frame — would wipe the drive, V/F curve included.
+
+So the script refuses, by register, regardless of what a saved file says:
+
+| Refused | Why |
+|---|---|
+| P00.13 | parameter lock; 10 restores factory defaults |
+| P11.xx | live readings, not settings |
+| P13.xx | drive identity, read only |
+| P10.01, P10.03 | live counter and timer values |
+
+#### What it does not do
+
+**It cannot tell whether the spindle is running.** The registers that look like
+they should say are ambiguous on this drive, so there is no guard — only a
+prompt. A guard that might not work is worse than none, because it invites
+trust it has not earned. Stop the spindle yourself before writing.
+
+For a one-off change the front panel is still the better tool: thirty seconds,
+and a wrong keypress affects one value. The script earns its place for
+repeatable changes and for rebuilding a drive that has been replaced or reset.
+
 ### The register mapping
 
 **Pgg.ii is at register `gg * 256 + ii`**, so P03.12 is 0x030C and P12.19 is

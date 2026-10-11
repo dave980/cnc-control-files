@@ -52,6 +52,7 @@ tools/deploy.sh                 upload config and macros over the network
 tools/deploy.ps1                the same, for Windows PowerShell
 tools/deploy.cmd                double-clickable launcher for the above
 tools/vfd_dump.py               read the VFD's parameters over Modbus (read only)
+tools/vfd_set.py                write VFD parameters, verified by read-back
 ```
 
 ## Installation
