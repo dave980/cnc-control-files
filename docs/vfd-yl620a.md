@@ -277,15 +277,40 @@ against the setup table PDF, it settles several things:
 - Percentages are 0.1 % units: P00.06 reads 1000 for 100.0 %, P00.08 reads 200
   for 20.0 %.
 
-### The motor overload setting — P12.00, corrected 2026-10-10
+### P12.00 — do not set this to 6.0 A. It stops the spindle starting.
 
-| Parameter | Shipped with | Now |
+| Parameter | Value | Result |
 |---|---|---|
-| P12.00 Rated motor current | 150 = 15.0 A | **60 = 6.0 A** |
+| P12.00 | 150 = 15.0 A | as shipped; spindle starts; no real thermal protection |
+| P12.00 | 60 = 6.0 A | matches the nameplate, **and the spindle will not start** |
 
-Written with `vfd_set.py` and confirmed reading **6.0** on the front panel,
-which also **settles the 0.1 A scaling** for this parameter — it had been
-inferred from P12.05 rather than documented.
+Tried on 2026-10-10 and reverted. The panel did read 6.0, which at least
+**settles the 0.1 A scaling** for this parameter — it had been inferred from
+P12.05 rather than documented.
+
+**Why it fails.** P12.00 is not just a thermal threshold. The drive's current
+limits are percentages *of* it:
+
+| | Against 15.0 A | Against 6.0 A |
+|---|---|---|
+| P01.03 accel overcurrent prevention, 140 % | 21 A | 8.4 A |
+| P01.04 overcurrent, 200 % | 30 A | 12 A |
+
+An induction motor draws several times its rated current to break away. At
+8.4 A the drive clamps before the spindle develops starting torque, so it
+never turns. Changing P12.00 moves four protection limits at once, which is
+the part that was missed when this was first recommended.
+
+**The underlying problem is still real.** At 15.0 A the thermal overload
+cannot protect a 6 A spindle, and that matters most during low-speed nut
+threading, where the V/F boost pushes current through windings the rotor fan
+is barely cooling. The fix is not a single parameter — it needs the starting
+limits raised in percentage terms as P12.00 comes down, so the absolute
+breakaway allowance is preserved while the thermal figure gets closer to the
+nameplate. Not attempted yet.
+
+Until then the heat warning above stays advisory: do not leave the spindle
+turning slowly for minutes.
 
 The nameplate says 6 A. P12.00 is what the drive's thermal overload protection
 measures the motor against, and it is set at **two and a half times** what the
@@ -298,11 +323,13 @@ in at 3.5 Hz, which drives real current through the windings while the
 rotor-mounted fan is barely turning — the heat warning above. With P12.00 at
 15 A the drive will watch that happen and do nothing.
 
+**Superseded — see above. Do not run this.**
+
 ```
 python tools/vfd_set.py --port COM3 --set P12.00=60
 ```
 
-**Still outstanding: run a tool change before cutting.** The limit is now 2.5x
+**Run a tool change after any change here.** The limit is now 2.5x
 tighter than anything this drive has run with, and nut threading at 1830 rpm
 with full V/F boost is the most current-hungry thing this spindle does. If the
 VFD faults during threading, that is the cause — P04.09 (stall detection time,
