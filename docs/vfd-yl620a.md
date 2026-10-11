@@ -1,7 +1,26 @@
 # YL620-A VFD — parameters and calibration
 
-Spindle: HLTNC GDZ80X73-2-2, 2.2 kW, **air cooled**, 24000 rpm at 400 Hz.
+Spindle: HLTNC GDZ80X73-2.2, 2.2 kW, **air cooled**, 24000 rpm at 400 Hz.
 So 60 rpm per Hz, and the VFD display is in 0.1 Hz units (483 means 48.3 Hz).
+
+![Spindle nameplate](images/spindle-nameplate.jpg)
+
+| Nameplate | |
+|---|---|
+| Voltage | 220 V ±10%, 3 phase |
+| Frequency | 400 Hz |
+| Speed | 24000 rpm |
+| Power | 2.2 kW |
+| **Current** | **6 A** |
+| Poles | 2 |
+| Efficiency | 0.8, cos φ 0.75 |
+| Duty / cooling | S1 continuous, air, IP50, TA 20 °C |
+
+Two poles at 400 Hz is what gives 24000 rpm, and it matches P12.02 on the
+drive. Note the nameplate does not balance arithmetically — 6 A at 220 V with
+cos φ 0.75 and η 0.8 is about 1.4 kW out, not 2.2 kW. That is normal for these
+spindles. **Protect to the 6 A, not to the 2.2 kW**, because 6 A is the figure
+that describes what the windings tolerate.
 
 ## Control
 
@@ -258,24 +277,52 @@ against the setup table PDF, it settles several things:
 - Percentages are 0.1 % units: P00.06 reads 1000 for 100.0 %, P00.08 reads 200
   for 20.0 %.
 
-### Worth checking against the spindle nameplate
+### The motor overload setting is wrong — P12.00
 
-Two protection settings sit well above the setup table's typical values:
-
-| Parameter | Drive | Setup table typical |
+| Parameter | Drive holds | Should be |
 |---|---|---|
-| P12.00 Rated motor current | 150 (15.0 A) | 5-8 A |
-| P01.04 Overcurrent setpoint | 200 % | 120 % |
+| P12.00 Rated motor current | 150 = **15.0 A** | 60 = **6.0 A** |
 
-P12.00 is what the drive's motor overload protection measures against. A 2.2 kW
-spindle's nameplate current is normally around 8 A, and if that is the case here
-then the protection is set at roughly double the motor's rating and will not
-trip before the spindle is in trouble. P12.05 reads 150 as well, which is the
-*converter's* rating — so one plausible reading is that P12.00 was left at the
-drive's rating instead of the motor's.
+The nameplate says 6 A. P12.00 is what the drive's thermal overload protection
+measures the motor against, and it is set at **two and a half times** what the
+spindle can take — so that protection cannot act before the windings are in
+trouble. P12.05, the *converter's* rated current, also reads 150, which is the
+likely explanation: the motor figure was left at the drive's rating.
 
-Not changed, because the spindle's nameplate has not been checked. Worth doing:
-read the nameplate current and set P12.00 to it.
+This matters most at the bottom of the range. The V/F boost puts 20 % voltage
+in at 3.5 Hz, which drives real current through the windings while the
+rotor-mounted fan is barely turning — the heat warning above. With P12.00 at
+15 A the drive will watch that happen and do nothing.
+
+```
+python tools/vfd_set.py --port COM3 --set P12.00=60 --dry-run
+python tools/vfd_set.py --port COM3 --set P12.00=60
+```
+
+**Confirm the units on the front panel afterwards.** P12.00 should read 6.0,
+not 60. The 0.1 A scaling is near-certain — P12.05 at 150 would be an absurd
+150 A otherwise — but it is inferred, not documented, and this is a parameter
+worth being sure about.
+
+**Then run a tool change before cutting.** A 6 A limit is 2.5x tighter than
+what the drive has been running with, and nut threading at 1830 rpm is the
+most current-hungry thing this spindle does. If the VFD faults during
+threading, that is why; P04.09 (stall detection time, currently 1.0 s) is the
+knob, per the note above.
+
+### Left alone deliberately
+
+**P12.01 reads 230 V against a 220 V nameplate.** Within the plate's ±10 %, and
+on a V/F drive the rated motor voltage scales the whole output curve — changing
+it would shift the low-speed boost that took the longest to get right, and the
+S1800/S2100/S24000 calibration with it. Not worth disturbing a working curve
+for a 4 % bookkeeping correction. If it is ever changed, re-run the calibration
+table.
+
+**P01.04 overcurrent trips at 200 %** against the setup table's typical 120 %.
+Correcting P12.00 improves this on its own: 200 % of 6 A is 12 A, where before
+it was 200 % of 15 A. A tighter instantaneous trip also risks nuisance faults
+on acceleration, so one change at a time.
 
 ### Values come back raw
 
