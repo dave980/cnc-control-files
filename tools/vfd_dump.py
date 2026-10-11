@@ -134,8 +134,13 @@ def main():
         "# YL620-A parameters, as read from the drive",
         "",
         f"Read over Modbus RTU at {args.baud} 8N1, slave {args.slave}, "
-        f"by `tools/vfd_dump.py`. {len(rows)} parameters; {missing} addresses "
-        "did not respond, which is expected for unimplemented ones.",
+        f"by `tools/vfd_dump.py`. {len(rows)} parameters read"
+        + (f"; {missing} addresses did not respond and were skipped."
+           if missing else
+           ", and every address in the swept range answered. The ranges are "
+           "deliberate overshoots, so a drive that replies to unimplemented "
+           "registers would look the same - treat unfamiliar values as "
+           "unverified rather than meaningful."),
         "",
         "**Values are raw register contents.** Most frequencies are stored in "
         "0.1 Hz, so 4000 means 400.0 Hz and 300 means 30.0 Hz — the same "
@@ -149,7 +154,9 @@ def main():
     text = "\n".join(out) + "\n"
 
     if args.out:
-        with open(args.out, "w") as f:
+        # encoding is explicit: Windows defaults open() to cp1252, which
+        # mangles the em dash below into a replacement character.
+        with open(args.out, "w", encoding="utf-8", newline="\n") as f:
             f.write(text)
         print(f"\nWrote {len(rows)} parameters to {args.out}", file=sys.stderr)
     else:

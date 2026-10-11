@@ -40,8 +40,8 @@ the spindle running slowly for minutes, and do not cut at these speeds.
 |---|---|---|
 | P03.10 | 3 | AI1 A/D lower limit |
 | P03.11 | 1010 | AI1 A/D upper limit |
-| P03.12 | **0** | Frequency at lower limit |
-| P03.13 | 400 | Frequency at upper limit |
+| P03.12 | **0** | Frequency at lower limit (raw 0) |
+| P03.13 | 400.0 Hz | Frequency at upper limit (raw 4000) |
 
 **P03.12 must be 0.** The setup table's 400 Hz column sets it to 60, which puts a
 60 Hz floor under every commanded speed — those spindles are not normally run
@@ -66,10 +66,15 @@ between spindle rpm and Z feed, and 1.7 % does not move that.
 
 | Parameter | Value | Note |
 |---|---|---|
-| P04.09 | 1 s | Stall detection time. Raise to 3 if the VFD faults while threading a nut |
-| P06.01 | 9 s | Accel time, 0 to max. From 0 to 30 Hz is only ~0.7 s, so the macro's `G4 P1` dwell is enough |
-| P06.02 | 8.6 s | Decel time |
-| P12.19 | 13 kHz | PWM frequency |
+| P04.09 | 1.0 s | Stall detection time. Raise to 3 if the VFD faults while threading a nut |
+| P06.01 | 5.0 s | Accel time, 0 to max. 0 to 30 Hz is only ~0.4 s, so the macro's `G4 P1` dwell is ample |
+| P06.02 | 5.0 s | Decel time |
+| P12.19 | 8.0 kHz | PWM frequency |
+
+These four were corrected from the dump. The table previously said 9 s / 8.6 s
+accel and decel and 13 kHz PWM, which were the setup table's suggested values
+copied in rather than read off the drive. The drive is on the plain defaults.
+Nothing was wrong on the machine — only in this file.
 
 ## FluidNC side
 
@@ -180,6 +185,43 @@ link that spindle control depends on.
 
 RS485 here is for **reading** parameters, where a dropped frame costs nothing
 because no motion depends on the transfer completing.
+
+### What the dump confirmed
+
+`docs/vfd-parameters.md` is the as-built state, read 2026-10-10. Cross-checked
+against the setup table PDF, it settles several things:
+
+- **P00.04 = 4000.** The one parameter whose value was known independently, so
+  this validates both the `Pgg.ii -> gg*256 + ii` mapping and the 0.1 Hz
+  scaling across the whole register space, not just the handful set by hand.
+- **P03.12 = 0.** The low-speed fix is confirmed on the drive, not just
+  remembered. The setup table's 400 Hz column puts 60 here, which is exactly
+  the floor that held S1800 at 48 Hz.
+- **P07.08 = 3** — frequency source is Analog Input 1, governed by
+  P03.10-P03.13. This is what makes the 0-10 V input the speed command at all,
+  and it was never explicitly verified before.
+- **P12.02 = 2** motor poles, which is what makes 400 Hz equal 24000 rpm.
+- Percentages are 0.1 % units: P00.06 reads 1000 for 100.0 %, P00.08 reads 200
+  for 20.0 %.
+
+### Worth checking against the spindle nameplate
+
+Two protection settings sit well above the setup table's typical values:
+
+| Parameter | Drive | Setup table typical |
+|---|---|---|
+| P12.00 Rated motor current | 150 (15.0 A) | 5-8 A |
+| P01.04 Overcurrent setpoint | 200 % | 120 % |
+
+P12.00 is what the drive's motor overload protection measures against. A 2.2 kW
+spindle's nameplate current is normally around 8 A, and if that is the case here
+then the protection is set at roughly double the motor's rating and will not
+trip before the spindle is in trouble. P12.05 reads 150 as well, which is the
+*converter's* rating — so one plausible reading is that P12.00 was left at the
+drive's rating instead of the motor's.
+
+Not changed, because the spindle's nameplate has not been checked. Worth doing:
+read the nameplate current and set P12.00 to it.
 
 ### Values come back raw
 

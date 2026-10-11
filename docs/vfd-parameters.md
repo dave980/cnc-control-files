@@ -1,8 +1,8 @@
 # YL620-A parameters, as read from the drive
 
-Read over Modbus RTU at 19200 8N1, slave 10, by `tools/vfd_dump.py`. 192 parameters; 0 addresses did not respond, which is expected for unimplemented ones.
+Read over Modbus RTU at 19200 8N1, slave 10, by `tools/vfd_dump.py`. 192 parameters read, and every address in the swept range answered. The ranges are deliberate overshoots, so a drive that replies to unimplemented registers would look the same - treat unfamiliar values as unverified rather than meaningful.
 
-**Values are raw register contents.** Most frequencies are stored in 0.1 Hz, so 4000 means 400.0 Hz and 300 means 30.0 Hz — the same convention as the front panel display. Percentages and times scale similarly. Check `docs/vfd-yl620a.md` for the ones that matter here.
+**Values are raw register contents.** Most frequencies are stored in 0.1 Hz, so 4000 means 400.0 Hz and 300 means 30.0 Hz - the same convention as the front panel display. Percentages and times scale similarly. Check `docs/vfd-yl620a.md` for the ones that matter here.
 
 | Parameter | Register | Raw value |
 |---|---|---|
