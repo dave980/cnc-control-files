@@ -109,8 +109,16 @@ python tools/vfd_dump.py --list
 ```
 
 Lists the ports the machine can actually see, with USB vendor IDs. The SH-U11F
-is FTDI, so it appears as **VID 0403**. A port with no USB id is on-board or a
-leftover registry entry, not the adapter.
+is FTDI, so it appears as **VID 0403**. On this laptop it is **COM3**:
+
+```
+COM6       no USB id    Standard Serial over Bluetooth link (COM6)
+COM5       no USB id    Standard Serial over Bluetooth link (COM5)
+COM3     0403:6001  USB Serial Port (COM3)
+```
+
+A port with no USB id is on-board, Bluetooth, or a leftover registry entry —
+never the adapter.
 
 `OSError(22, 'The semaphore timeout period has expired.', None, 121)` on open is
 a **host and adapter problem, not a VFD problem**. It fails before a single byte
@@ -119,13 +127,18 @@ untested at that point — do not go rewiring the drive end over it.
 
 Usual causes, in the order worth checking:
 
-1. **The adapter is on a different COM number.** `--list` settles it.
-2. **A ghost port.** Run `--list` with the adapter plugged in, then unplug it
+1. **The port is a Bluetooth link.** This is what happened here: COM5 and COM6
+   are both "Standard Serial over Bluetooth link". Windows tries to raise an
+   RFCOMM connection to a device that is not there, waits, and times out — and
+   error 121 is exactly how that surfaces. These ports exist whether or not
+   anything is paired.
+2. **The adapter is on a different COM number.** `--list` settles it.
+3. **A ghost port.** Run `--list` with the adapter plugged in, then unplug it
    and run it again. A port that stays in the list when unplugged is a leftover
    from a previous adapter and will never open.
-3. **USB link failure.** Try a different port directly on the PC rather than
+4. **USB link failure.** Try a different port directly on the PC rather than
    through a hub, and a different cable. Error 121 is a USB timeout at heart.
-4. **Driver.** A device showing in Device Manager with a warning triangle, or
+5. **Driver.** A device showing in Device Manager with a warning triangle, or
    enumerating under an unexpected VID, has a driver problem rather than a
    wiring one.
 
