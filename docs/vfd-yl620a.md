@@ -277,11 +277,15 @@ against the setup table PDF, it settles several things:
 - Percentages are 0.1 % units: P00.06 reads 1000 for 100.0 %, P00.08 reads 200
   for 20.0 %.
 
-### The motor overload setting is wrong — P12.00
+### The motor overload setting — P12.00, corrected 2026-10-10
 
-| Parameter | Drive holds | Should be |
+| Parameter | Shipped with | Now |
 |---|---|---|
-| P12.00 Rated motor current | 150 = **15.0 A** | 60 = **6.0 A** |
+| P12.00 Rated motor current | 150 = 15.0 A | **60 = 6.0 A** |
+
+Written with `vfd_set.py` and confirmed reading **6.0** on the front panel,
+which also **settles the 0.1 A scaling** for this parameter — it had been
+inferred from P12.05 rather than documented.
 
 The nameplate says 6 A. P12.00 is what the drive's thermal overload protection
 measures the motor against, and it is set at **two and a half times** what the
@@ -295,20 +299,18 @@ rotor-mounted fan is barely turning — the heat warning above. With P12.00 at
 15 A the drive will watch that happen and do nothing.
 
 ```
-python tools/vfd_set.py --port COM3 --set P12.00=60 --dry-run
 python tools/vfd_set.py --port COM3 --set P12.00=60
 ```
 
-**Confirm the units on the front panel afterwards.** P12.00 should read 6.0,
-not 60. The 0.1 A scaling is near-certain — P12.05 at 150 would be an absurd
-150 A otherwise — but it is inferred, not documented, and this is a parameter
-worth being sure about.
+**Still outstanding: run a tool change before cutting.** The limit is now 2.5x
+tighter than anything this drive has run with, and nut threading at 1830 rpm
+with full V/F boost is the most current-hungry thing this spindle does. If the
+VFD faults during threading, that is the cause — P04.09 (stall detection time,
+currently 1.0 s) is the knob, per the note above.
 
-**Then run a tool change before cutting.** A 6 A limit is 2.5x tighter than
-what the drive has been running with, and nut threading at 1830 rpm is the
-most current-hungry thing this spindle does. If the VFD faults during
-threading, that is why; P04.09 (stall detection time, currently 1.0 s) is the
-knob, per the note above.
+`docs/vfd-parameters.md` still shows the old 150 and is now stale. Re-run the
+dump to bring it back to as-built; it is a machine-written record and editing
+the row by hand would defeat the point of having it.
 
 ### Left alone deliberately
 

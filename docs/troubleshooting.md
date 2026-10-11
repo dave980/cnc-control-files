@@ -134,6 +134,21 @@ never reproduced it.
 Fixed by having `tc.nc` and `measuretool.nc` return to their starting XY in
 machine coordinates before finishing. Full write-up in `tool-changer.md`.
 
+### VFD parameters dumped and cross-checked
+
+`tools/vfd_dump.py` read all 192 addresses over the SH-U11F on COM3. P00.04
+returned 4000, which validated the `Pgg.ii -> gg*256 + ii` mapping and the
+0.1 Hz scaling independently rather than by inference.
+
+Checked against the setup table PDF it corrected four values in
+`vfd-yl620a.md` that had been copied from the PDF's suggested column rather
+than read from the drive, confirmed P03.12 = 0 and P07.08 = 3 on the hardware,
+and surfaced the P12.00 overload setting.
+
+Getting the port open was the only real obstacle, and it was not the adapter:
+COM5 was a Bluetooth virtual port, whose unanswered RFCOMM handshake is what
+produces `error 121, semaphore timeout`. The adapter was COM3 all along.
+
 ## Open
 
 ### CL57T alarm outputs are not read by the controller
@@ -155,9 +170,19 @@ running, so the controller keeps a stale position and nothing alarms. `$H`
 after every E-stop is the workaround. `estop_pin` from a spare contact would
 make it a real alarm. See `wiring.md`.
 
-### VFD parameters not yet dumped
+### Tool change not yet run since P12.00 was corrected
 
-`tools/vfd_dump.py` is written and read-only but has not been run — waiting on
-the SH-U11F adapter and a 3-pin pigtail. First read should be P00.04 returning
-4000, which confirms the 0.1 Hz scaling holds across the register space and not
-just the handful of parameters set by hand.
+The spindle's motor overload was set at 15.0 A against a 6 A nameplate and has
+been corrected to 6.0 A. That is 2.5x tighter than anything this drive has run
+with, and nut threading at 1830 rpm with full V/F boost is the most
+current-hungry thing the spindle does.
+
+**Run a tool change before cutting.** If the VFD faults while threading, this
+is the cause rather than a mechanical problem, and P04.09 (stall detection
+time, 1.0 s) is the knob. See `vfd-yl620a.md`.
+
+### `vfd-parameters.md` is stale
+
+It still records P12.00 as 150. Re-run `vfd_dump.py` to bring the file back to
+as-built — it is a machine-written record, so correcting the row by hand would
+defeat the point of keeping it.
