@@ -102,6 +102,33 @@ swap A and B; that is the usual first mistake and it does no harm.
 About 12 seconds for the full sweep of 192 addresses; unimplemented ones return
 a Modbus exception and are skipped.
 
+### If the port will not open
+
+```
+python tools/vfd_dump.py --list
+```
+
+Lists the ports the machine can actually see, with USB vendor IDs. The SH-U11F
+is FTDI, so it appears as **VID 0403**. A port with no USB id is on-board or a
+leftover registry entry, not the adapter.
+
+`OSError(22, 'The semaphore timeout period has expired.', None, 121)` on open is
+a **host and adapter problem, not a VFD problem**. It fails before a single byte
+is sent, so wiring, baud rate, slave address and A/B polarity are all still
+untested at that point — do not go rewiring the drive end over it.
+
+Usual causes, in the order worth checking:
+
+1. **The adapter is on a different COM number.** `--list` settles it.
+2. **A ghost port.** Run `--list` with the adapter plugged in, then unplug it
+   and run it again. A port that stays in the list when unplugged is a leftover
+   from a previous adapter and will never open.
+3. **USB link failure.** Try a different port directly on the PC rather than
+   through a hub, and a different cable. Error 121 is a USB timeout at heart.
+4. **Driver.** A device showing in Device Manager with a warning triangle, or
+   enumerating under an unexpected VID, has a driver problem rather than a
+   wiring one.
+
 Comms settings on this drive, which are the script's defaults:
 
 | Parameter | Value | Meaning |

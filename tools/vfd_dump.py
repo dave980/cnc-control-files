@@ -68,7 +68,9 @@ def read_register(port, slave, reg, retries=2):
 
 def main():
     ap = argparse.ArgumentParser(description="Dump YL620-A parameters (read only)")
-    ap.add_argument("--port", required=True, help="serial port, e.g. COM5 or /dev/ttyUSB0")
+    ap.add_argument("--port", help="serial port, e.g. COM5 or /dev/ttyUSB0")
+    ap.add_argument("--list", action="store_true",
+                    help="list the serial ports this machine can actually see, then exit")
     ap.add_argument("--baud", type=int, default=19200, help="default 19200 (P03.00=4)")
     ap.add_argument("--slave", type=int, default=10, help="default 10 (P03.01)")
     ap.add_argument("-o", "--out", help="write markdown here instead of stdout")
@@ -79,11 +81,37 @@ def main():
     except ImportError:
         sys.exit("pyserial missing:  pip install pyserial")
 
+    if args.list:
+        from serial.tools import list_ports
+        found = list(list_ports.comports())
+        if not found:
+            sys.exit("No serial ports visible at all. The adapter is not enumerating — "
+                     "check the USB cable and that the driver installed.")
+        for p in found:
+            vid_pid = f"{p.vid:04X}:{p.pid:04X}" if p.vid is not None else "  no USB id  "
+            print(f"{p.device:<8} {vid_pid}  {p.description}")
+        print("\nAn FTDI adapter shows VID 0403. A port with no USB id is "
+              "on-board or a leftover entry, not your adapter.")
+        return
+
+    if not args.port:
+        sys.exit("--port is required (or use --list to see what is available)")
+
     try:
         port = serial.Serial(args.port, args.baud, bytesize=8,
                              parity=serial.PARITY_NONE, stopbits=1, timeout=0.3)
-    except serial.SerialException as e:
-        sys.exit(f"cannot open {args.port}: {e}")
+    except (serial.SerialException, OSError) as e:
+        hint = ""
+        if "semaphore" in str(e).lower() or getattr(e, "winerror", None) == 121:
+            hint = ("\n\nWindows error 121 means the port was found in the registry but the "
+                    "device behind it did not answer. It is a host/adapter problem — nothing "
+                    "has been sent to the VFD yet, so wiring, baud and A/B polarity are not "
+                    "involved.\n"
+                    "  - run with --list to see which ports really exist right now\n"
+                    "  - unplug and replug the adapter and watch whether the port appears\n"
+                    "  - try a different USB port, directly on the PC, not through a hub\n"
+                    "  - COM5 may be a leftover entry from a previous adapter")
+        sys.exit(f"cannot open {args.port}: {e}{hint}")
 
     rows, missing = [], 0
     with port:
