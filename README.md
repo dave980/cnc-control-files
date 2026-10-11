@@ -97,6 +97,9 @@ Working:
 - Spindle across the full range, including tool-change speeds
 - M6 tool change — load, unload, IR beam verification, tool setter touch-off
 - Magazine verified at **all six pockets** over repeated changes
+- Spindle motor overload left at 15.0 A — the 6 A nameplate value stops the
+  spindle starting. See `docs/vfd-yl620a.md`; the heat discipline is the
+  real protection.
 - Y position holds — the left rail was out of parallel; loosened and re-torqued
 
 Not wired yet:

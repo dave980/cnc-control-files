@@ -160,6 +160,10 @@ spindle: starting takes 13-19 A, the protection trips on that, and one
 parameter governs both the starting allowance and the sustained limit. Full
 reasoning in `vfd-yl620a.md`.
 
+Tool changes verified again at 15.0 A, pickup and return, after the revert.
+`vfd-parameters.md` is accurate as it stands, since the drive is back at the
+value it was dumped with.
+
 Worth recording as a method failure too. Three values were chosen by
 arithmetic from the nameplate; two of them stopped the machine. The parameter
 looked like a single threshold and is actually the scaling base for a group.
@@ -185,9 +189,3 @@ running, so the controller keeps a stale position and nothing alarms. `$H`
 after every E-stop is the workaround. `estop_pin` from a spare contact would
 make it a real alarm. See `wiring.md`.
 
-
-### `vfd-parameters.md` is stale
-
-It still records P12.00 as 150. Re-run `vfd_dump.py` to bring the file back to
-as-built — it is a machine-written record, so correcting the row by hand would
-defeat the point of keeping it.
