@@ -149,6 +149,21 @@ Getting the port open was the only real obstacle, and it was not the adapter:
 COM5 was a Bluetooth virtual port, whose unanswered RFCOMM handshake is what
 produces `error 121, semaphore timeout`. The adapter was COM3 all along.
 
+### Spindle would not start after tightening the motor overload
+
+`Err11`, motor overload. The dump showed P12.00 (rated motor current) at
+15.0 A against a 6 A nameplate, so it was set to 6.0 A — and the spindle then
+would not turn at all. 10.0 A failed too. Back at 15.0 A it runs.
+
+The conclusion is that the drive's overload protection cannot be used on this
+spindle: starting takes 13-19 A, the protection trips on that, and one
+parameter governs both the starting allowance and the sustained limit. Full
+reasoning in `vfd-yl620a.md`.
+
+Worth recording as a method failure too. Three values were chosen by
+arithmetic from the nameplate; two of them stopped the machine. The parameter
+looked like a single threshold and is actually the scaling base for a group.
+
 ## Open
 
 ### CL57T alarm outputs are not read by the controller
@@ -170,16 +185,6 @@ running, so the controller keeps a stale position and nothing alarms. `$H`
 after every E-stop is the workaround. `estop_pin` from a spare contact would
 make it a real alarm. See `wiring.md`.
 
-### Tool change not yet run since P12.00 was corrected
-
-The spindle's motor overload was set at 15.0 A against a 6 A nameplate and has
-been corrected to 6.0 A. That is 2.5x tighter than anything this drive has run
-with, and nut threading at 1830 rpm with full V/F boost is the most
-current-hungry thing the spindle does.
-
-**Run a tool change before cutting.** If the VFD faults while threading, this
-is the cause rather than a mechanical problem, and P04.09 (stall detection
-time, 1.0 s) is the knob. See `vfd-yl620a.md`.
 
 ### `vfd-parameters.md` is stale
 

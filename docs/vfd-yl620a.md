@@ -313,86 +313,48 @@ against the setup table PDF, it settles several things:
 - Percentages are 0.1 % units: P00.06 reads 1000 for 100.0 %, P00.08 reads 200
   for 20.0 %.
 
-### P12.00 — do not set this to 6.0 A. It stops the spindle starting.
+### P12.00 stays at 15.0 A — tested, and the nameplate value cannot be used
 
-| Parameter | Value | Result |
+| P12.00 | P01.05 trip (130 %) | Result |
 |---|---|---|
-| P12.00 | 150 = 15.0 A | as shipped; spindle starts; no real thermal protection |
-| P12.00 | 60 = 6.0 A | matches the nameplate, **and the spindle will not start** |
+| 60 = 6.0 A | 7.8 A | `Err11` motor overload, spindle never turns |
+| 100 = 10.0 A | 13 A | still will not start |
+| **150 = 15.0 A** | 19.5 A | **works — leave it here** |
 
-Tried on 2026-10-10 and reverted. The panel did read 6.0, which at least
-**settles the 0.1 A scaling** for this parameter — it had been inferred from
-P12.05 rather than documented.
+Tested on 2026-10-10 and reverted to 15.0 A. The one thing gained is certainty
+about the 0.1 A scaling: the panel read 6.0 for a register value of 60.
 
-**The drive said `Err11` — motor overload.** Not an overcurrent trip; the
-overload *model*. P12.00 is the current that model measures against, and
-P01.05 is the threshold as a percentage of it:
+**What the three results actually tell us.** The spindle needs somewhere
+between 13 A and 19.5 A to get moving — two to three times its 6 A nameplate.
+That is unremarkable for an induction motor. What matters is that the drive's
+overload protection trips on it anyway, despite P01.06 nominally allowing
+120 seconds. So this is not a slow thermal integral that tolerates a brief
+surge; it acts fast enough to catch the start.
 
-| | Against 15.0 A | Against 6.0 A |
-|---|---|---|
-| P01.05 overload protection, 130 % | 19.5 A | **7.8 A** |
-| P01.06 overload protection time | 120 s | 120 s |
+**That makes P12.00 unusable as motor protection on this machine.** One
+parameter has to serve both the starting allowance and the sustained limit, and
+the starting requirement sets a floor of roughly 15 A. Anything low enough to
+protect a 6 A winding is too low to let the spindle turn.
 
-A 2.2 kW induction spindle draws well past 7.8 A getting moving, so the
-overload trips before it is turning. Changing P12.00 moves every limit derived
-from it, which is what was missed when this was first recommended — it was
-treated as one threshold rather than the scaling base for the group.
+The V/F boost is entangled in this. 20 % voltage at 3.5 Hz against the ~0.9 %
+a straight line would give is what made tool-change speeds possible at all, and
+it is also what drives the current. Backing the boost off would let P12.00 come
+down — and would cost the low-speed capability the tool changer depends on.
 
-**A latched fault survives the revert.** After putting P12.00 back, clear the
-fault (power-cycle the VFD) or the spindle stays dead and it looks as though
-the revert did not work.
+**So the protection is operational, not electronic.** The heat warning near the
+top of this file is the real safeguard: a few seconds of nut threading is fine,
+minutes of slow running is not. Nothing in the drive is going to stop you.
 
-**The underlying problem is still real.** At 15.0 A the overload cannot
-protect a 6 A spindle, and that matters most during low-speed nut threading,
-where the V/F boost pushes current through windings the rotor fan is barely
-cooling.
+If genuine protection is wanted later, it has to come from outside this
+parameter — a temperature sensor on the spindle body rather than a current
+threshold. The fault table lists `Err45 motor over temperature`, so the drive
+has an input for one; whether this spindle has a thermistor pair in its cable
+has not been checked.
 
-But the drive's overload model is too crude to both let a boosted low-speed
-start happen and protect a 6 A motor, because one percentage governs both.
-Raising P01.05 to allow the start raises the sustained trip point by the same
-proportion, which gives most of the protection back.
-
-The honest options, none yet attempted:
-
-- **An intermediate P12.00.** Something like 90-100 (9-10 A) tightens the
-  overload meaningfully from 15 A without starving the start. Crude, but it
-  moves in the right direction and is one parameter.
-- **Measure first.** A clamp meter on one spindle lead during a start and
-  during nut threading gives the actual numbers, and then P12.00 and P01.05
-  can be chosen rather than guessed. This is the one worth doing.
-
-Until then the heat warning above stays advisory: do not leave the spindle
-turning slowly for minutes.
-
-Until then the heat warning above stays advisory: do not leave the spindle
-turning slowly for minutes.
-
-The nameplate says 6 A. P12.00 is what the drive's thermal overload protection
-measures the motor against, and it is set at **two and a half times** what the
-spindle can take — so that protection cannot act before the windings are in
-trouble. P12.05, the *converter's* rated current, also reads 150, which is the
-likely explanation: the motor figure was left at the drive's rating.
-
-This matters most at the bottom of the range. The V/F boost puts 20 % voltage
-in at 3.5 Hz, which drives real current through the windings while the
-rotor-mounted fan is barely turning — the heat warning above. With P12.00 at
-15 A the drive will watch that happen and do nothing.
-
-**Superseded — see above. Do not run this.**
-
-```
-python tools/vfd_set.py --port COM3 --set P12.00=60
-```
-
-**Run a tool change after any change here.** The limit is now 2.5x
-tighter than anything this drive has run with, and nut threading at 1830 rpm
-with full V/F boost is the most current-hungry thing this spindle does. If the
-VFD faults during threading, that is the cause — P04.09 (stall detection time,
-currently 1.0 s) is the knob, per the note above.
-
-`docs/vfd-parameters.md` still shows the old 150 and is now stale. Re-run the
-dump to bring it back to as-built; it is a machine-written record and editing
-the row by hand would defeat the point of having it.
+**Do not retry a lower P12.00 without measuring first.** Three values were
+tried by reasoning from the nameplate and two of them stopped the machine. A
+clamp meter on one spindle lead during a start would turn this from guesswork
+into a number.
 
 ### Left alone deliberately
 
