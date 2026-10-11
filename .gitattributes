@@ -1,8 +1,19 @@
-# Keep LF in the repo. FluidNC's InputFile::readLine skips \r so CRLF would
-# work on the controller, but LF keeps diffs clean across machines.
+# The working copy is Windows; the controller and the deploy shell script are not.
+* text=auto
+
+# Must stay LF - bash refuses a script with CRLF line endings
+*.sh text eol=lf
+
+# Uploaded to the controller. FluidNC's readLine() skips \r so CRLF would work,
+# but there is no reason to send bytes that only exist for Notepad's benefit.
 *.nc    text eol=lf
 *.yaml  text eol=lf
-*.sh    text eol=lf
-*.md    text eol=lf
-*.ps1   text eol=crlf
-*.cmd   text eol=crlf
+*.py    text eol=lf
+
+# Windows-only, and cmd.exe genuinely wants CRLF
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+
+*.jpg binary
+*.png binary
+*.pdf binary
