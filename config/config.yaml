@@ -124,13 +124,18 @@ macros:
   macro1: $LocalFS/Run=findzposition.nc
 
 # --- Driver alarms and E-stop signalling (not yet wired) ---
-# gpio.37 is free: it was the dust cover wire before that was abandoned.
-# Polarity depends on how the CL57T ALM output behaves -- see docs/wiring.md.
-#   closes on alarm (NO), wired in parallel -> gpio.37:low
-#   opens on alarm (NC), wired in series    -> gpio.37
+# gpio.37 is the ONLY free opto input. 36 probe, 38 IR beam, 39/40/41/42
+# limits. The 5V outputs (4, 5, 45, 46) sit behind a buffer and cannot be
+# read, so there is no second pin: fault_pin and estop_pin cannot both have
+# one. Wire the ALM here first -- a driver fault is invisible to FluidNC
+# today, whereas the E-stop already cuts power and only misreports position.
+#
+# CL57T brings out a single ALM pin returning through COM-, so the four are
+# paralleled; a series chain is not possible. Polarity must be measured
+# before wiring all four -- see docs/wiring.md, which also covers why
+# conduct-when-healthy would break the parallel arrangement entirely.
 # control:
-#   fault_pin: gpio.37:low     # all four CL57T ALM outputs, ganged
-#   estop_pin: gpio.XX         # spare contact on the E-stop, if one is added
+#   fault_pin: gpio.37:low     # four CL57T ALM outputs, paralleled
 
 spi:
   miso_pin: gpio.2

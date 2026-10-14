@@ -123,6 +123,59 @@ control:
 cover wire before that was abandoned — and it sits in the same header block as
 the limit switches, so the wiring lands next to everything else.
 
+### Only one input is free
+
+This constrains everything below. GPIO 36-42 are the entire opto-isolated
+block, and six of the seven are spoken for:
+
+| Pin | Used by |
+|---|---|
+| gpio.36 | probe / tool setter |
+| **gpio.37** | **free** |
+| gpio.38 | IR beam |
+| gpio.39 | Z limit |
+| gpio.40 | Y2 limit |
+| gpio.41 | Y1 limit |
+| gpio.42 | X limit |
+
+The four 5 V outputs (gpio.4, 5, 45, 46) are behind a 74AHCT125 buffer and
+cannot be read back. So `fault_pin` and `estop_pin` cannot both have a pin.
+
+**Wire the ALM.** A driver faulting on position error is invisible to FluidNC
+today, and that is what made the Y drift hunt take as long as it did. The
+E-stop already cuts power — it is performing its real safety function, and
+signalling it only stops the position display from lying afterwards. One is a
+gap in protection, the other is a refinement.
+
+#### Sharing the pin, if you want both
+
+An E-stop contact can join the same input, but the senses fight. An NC contact
+rests closed (pin low) and opens on press; the ALM, if it conducts on alarm,
+rests open and pulls low. One pin has one polarity.
+
+To share, the E-stop needs an **NO** contact so both sources pull low, landing
+both on `fault_pin: gpio.37:low`. Either one then trips the critical alarm and
+you cannot tell which — the behaviour is identical, only the message differs.
+The cost is the fail-safe property: an NC contact announces a broken wire,
+an NO one does not.
+
+### Wiring it
+
+```
+driver 1  ALM ──┐
+driver 2  ALM ──┤
+driver 3  ALM ──┼──────────── gpio.37  signal
+driver 4  ALM ──┘
+
+driver 1  COM- ─┐
+driver 2  COM- ─┤
+driver 3  COM- ─┼──────────── input header  GND
+driver 4  COM- ─┘
+```
+
+Two wires per driver to a terminal block on the breakout panel, then one pair
+across to the Doberman. All four ALM commoned, all four COM- commoned.
+
 ### Ganging four ALM outputs
 
 Each driver brings out a **single ALM pin**, not a floating ALM+ / ALM- pair.
