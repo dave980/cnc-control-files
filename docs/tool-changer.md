@@ -23,6 +23,19 @@ Pitch 45.000 mm, base Y85.400. Tool setter sits at **X1211.000 Y32.000** — it 
 separate hardware that happens to share an X value with the pockets, so pocket
 corrections do not move it.
 
+**Manual tool changes also happen at X1211.000 Y32.000**, over the setter. Any
+tool outside 1-6 — T0, or anything above the magazine's range — parks there at
+machine Z0 and waits on `M0`. It used to park at X0 Y0, the home corner.
+
+Over the setter is the right place for it because the macro probes there
+immediately afterwards: the hand-fitted tool is measured without moving, so
+nothing traverses with a tool whose length is still unknown. Z0 puts the nose
+140 mm above the spoil board, which is room enough to get a tool and nut in.
+
+**Mind what you drop.** You are working directly above the tool setter, and it
+is the one piece of hardware here that has already been broken once. A dropped
+collet nut lands on it.
+
 | Z | Purpose |
 |---|---|
 | 0 | Safe / traverse |
