@@ -23,18 +23,23 @@ Pitch 45.000 mm, base Y85.400. Tool setter sits at **X1211.000 Y32.000** — it 
 separate hardware that happens to share an X value with the pockets, so pocket
 corrections do not move it.
 
-**Manual tool changes also happen at X1211.000 Y32.000**, over the setter. Any
-tool outside 1-6 — T0, or anything above the magazine's range — parks there at
-machine Z0 and waits on `M0`. It used to park at X0 Y0, the home corner.
+**Manual tool changes happen at X1100.000 Y32.000**, 111 mm clear of the
+magazine in X. Any tool outside 1-6 — T0, or anything above the magazine's
+range — parks there at machine Z0 and waits on `M0`. It used to park at X0 Y0,
+the home corner.
 
-Over the setter is the right place for it because the macro probes there
-immediately afterwards: the hand-fitted tool is measured without moving, so
-nothing traverses with a tool whose length is still unknown. Z0 puts the nose
-140 mm above the spoil board, which is room enough to get a tool and nut in.
+Near the magazine, but deliberately not over it, for two reasons. Nothing can
+be dropped onto the tool setter, which is the one part here that has already
+been broken once. And the working height is better: parked over the magazine
+the nose has about 90 mm of clear space beneath it, because the magazine
+occupies the bottom 50 mm — over bare spoil board it is the full 140 mm.
 
-**Mind what you drop.** You are working directly above the tool setter, and it
-is the one piece of hardware here that has already been broken once. A dropped
-collet nut lands on it.
+Offset in X rather than Y because Y32 is already near the home end, and moving
+the other way in Y runs into the pockets at Y85.400.
+
+**Machine Z0 is the ceiling.** The axis homes to the top and all travel is
+negative from there, so the park is already as high as the machine goes. More
+headroom can only come from the XY position, which is what the offset does.
 
 | Z | Purpose |
 |---|---|

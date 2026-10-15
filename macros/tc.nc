@@ -27,7 +27,7 @@ o1000 else
     o1300 if [#<_current_tool> EQ 0]
     o1300 elseif [#<_current_tool> GT 6]
         G53 G90 G0 Z0.000
-        G53 G90 G0 X1211.000 Y32.000
+        G53 G90 G0 X1100.000 Y32.000
         (print, Tool is out of range. Manually unload tool and cycle start to continue.)
         M0
     o1300 else
@@ -91,7 +91,7 @@ o1000 else
         o1410 endif
     o1400 else
         G53 G90 G0 Z0.000
-        G53 G90 G0 X1211.000 Y32.000
+        G53 G90 G0 X1100.000 Y32.000
         (print, Tool is out of range. Manually load tool and cycle start to continue.)
         M0
     o1400 endif
