@@ -6,7 +6,7 @@
 #<ds_park_y>   = 610.000
 #<ds_clear_x>  = 1210.000     (XY in line with the stand rails, shoe fully clear of them)
 #<ds_clear_y>  = 730.000
-#<ds_engage_z> = -90.000     (Z where the spindle plate meets the parked shoe)
+#<ds_engage_z> = -87.500     (Z where the spindle plate meets the parked shoe)
 #<ds_lift>     = 15.000    (start the slow descent this far above engage Z)
 #<ds_slide_f>  = 1000.0    (feed for sliding out of the stand)
 #<ds_lift_f>   = 300.0     (feed for the final descent onto the magnets)

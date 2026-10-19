@@ -6,7 +6,7 @@
 #<ds_park_y>   = 610.000
 #<ds_clear_x>  = 1210.000     (XY in line with the stand rails, shoe fully clear of them)
 #<ds_clear_y>  = 730.000
-#<ds_engage_z> = -90.000     (Z where the shoe's side slot lines up with the stand flanges)
+#<ds_engage_z> = -87.500     (Z where the shoe's side slot lines up with the stand flanges)
 #<ds_lift>     = 15.000    (how far to pull straight up to break the magnets)
 #<ds_slide_f>  = 1000.0    (feed for sliding into the stand)
 #<ds_lift_f>   = 300.0     (feed for pulling off the magnets)

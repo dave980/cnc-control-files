@@ -24,9 +24,9 @@ o1000 else
     (Positions match macros/dustshoe_unload.nc -- change both together)
     G53 G90 G0 Z0.000
     G53 G90 G0 X1210.000 Y730.000
-    G53 G90 G0 Z-90.000
+    G53 G90 G0 Z-87.500
     G53 G90 G1 Y610.000 F1000.0
-    G53 G90 G1 Z-75.000 F300.0
+    G53 G90 G1 Z-72.500 F300.0
     G53 G90 G0 Z0.000
     G53 G90 G0 Z0.000
     G43.1 Z0
@@ -115,8 +115,8 @@ o1000 else
     (--- Dust shoe back on: drop onto it at X1210 Y610, slide out to Y730 ---)
     (Positions match macros/dustshoe_load.nc -- change both together)
     G53 G90 G0 X1210.000 Y610.000
-    G53 G90 G0 Z-75.000
-    G53 G90 G1 Z-90.000 F300.0
+    G53 G90 G0 Z-72.500
+    G53 G90 G1 Z-87.500 F300.0
     G4 P0.3
     G53 G90 G1 Y730.000 F1000.0
     G53 G90 G0 Z0.000
