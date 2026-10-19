@@ -5,11 +5,11 @@ spindle. The lower brush section is held to it by magnets and parks in a
 printed stand bolted to the spoil board. The stand has two uprights whose top
 flanges run in the slot along the side of the shoe.
 
-- **Unload** (`macros/dustshoe_unload.nc`, WebUI macro button 2): at the
+- **Unload** (`macros/dustshoe_unload.nc`, config `macro2`): at the
   slot's height, slide the shoe sideways onto the stand flanges, then pull
   the spindle straight up. The flanges hold the shoe down and the magnets
   let go.
-- **Load** (`macros/dustshoe_load.nc`, WebUI macro button 3): come down
+- **Load** (`macros/dustshoe_load.nc`, config `macro3`): come down
   slowly over the parked shoe until the magnets seat, then slide it back off
   the flanges.
 
@@ -48,6 +48,14 @@ picks the shoe up.
 
 ## Standalone macros
 
+`macro2` and `macro3` in `config.yaml` are FluidNC's numbered macros, not WebUI
+buttons. Run them from the console with `$Macros/Run=2` (park) and
+`$Macros/Run=3` (pick up), or call the files directly with
+`$LocalFS/Run=dustshoe_unload.nc` / `dustshoe_load.nc`. To get an on-screen
+button, add a WebUI macro whose command is one of those lines. A physical
+button would need a free input pin, and gpio.37 is reserved for the driver
+alarms.
+
 For parking or fitting the shoe outside a tool change. Load stops on `M0`
 first and asks a person to confirm the shoe is in the stand. Running it with
 the shoe already on would drive the shoe into the stand.
@@ -58,11 +66,11 @@ the shoe already on would drive the shoe into the stand.
   stand's base plate. Check stick-out against the stand on the first run.
 - **Path at Z −90.** The shoe moves X1210, from Y730 to Y610, beside the
   magazine (pockets run Y85–310 at X1211.4). Keep that space clear.
-- **`measuretool.nc` (macro button 0) does not remove the shoe.** It probes
+- **`measuretool.nc` (config `macro0`) does not remove the shoe.** It probes
   from Z0 down to −75 over the setter with the brushes hanging below the nose.
-  Park the shoe first with macro button 2.
+  Park the shoe first with `$Macros/Run=2`.
 
 ## First run
 
 Do a dry run with feed override at 25% and a hand on feed hold. Run unload
-(button 2), then load (button 3), then an `M6` between two tools.
+(`$Macros/Run=2`), then load (`$Macros/Run=3`), then an `M6` between two tools.

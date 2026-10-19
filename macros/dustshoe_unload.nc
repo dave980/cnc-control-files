@@ -32,7 +32,7 @@ G53 G90 G0 X[#<ds_clear_x>] Y[#<ds_clear_y>]
 G53 G90 G0 Z[#<ds_engage_z>]
 
 (Slide the shoe's slot onto the stand flanges)
-G53 G90 G0 X[#<ds_park_x> + G53 G90 G1 X[#<ds_park_x>] Y[#<ds_park_y>] F[#<ds_slide_f>]
+G53 G90 G1 X[#<ds_park_x>] Y[#<ds_park_y>] F[#<ds_slide_f>]
 
 (Pull straight up -- the flanges hold the shoe, the magnets let go)
 G53 G90 G1 Z[#<ds_engage_z> + #<ds_lift>] F[#<ds_lift_f>]

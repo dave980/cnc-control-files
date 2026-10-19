@@ -115,8 +115,8 @@ Not wired yet:
 In progress:
 
 - **Dust shoe load/unload** — `tc.nc` parks the shoe at X1210 Y610 before every
-  tool change and refits it afterwards. Standalone versions are on macro buttons
-  2 and 3. Written but not yet dry-run. See `docs/dust-shoe.md`.
+  tool change and refits it afterwards. Standalone versions run with
+  `$Macros/Run=2` and `$Macros/Run=3`. Written but not yet dry-run. See `docs/dust-shoe.md`.
 
 Not fitted:
 
