@@ -122,6 +122,8 @@ user_inputs:
 macros:
   macro0: $LocalFS/Run=measuretool.nc
   macro1: $LocalFS/Run=findzposition.nc
+  macro2: $LocalFS/Run=dustshoe_unload.nc   # park dust shoe in its stand
+  macro3: $LocalFS/Run=dustshoe_load.nc     # pick dust shoe up from its stand
 
 # --- Driver alarms and E-stop signalling (not yet wired) ---
 # gpio.37 is the ONLY free opto input. 36 probe, 38 IR beam, 39/40/41/42

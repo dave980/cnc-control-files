@@ -54,6 +54,7 @@ tools/deploy.cmd                double-clickable launcher for the above
 tools/vfd_dump.py               read the VFD's parameters over Modbus (read only)
 tools/vfd_set.py                write VFD parameters, verified by read-back
 cad/dust-shoe/                  dust shoe — Fusion .f3d and printable STLs
+docs/dust-shoe.md               dust shoe load/unload macros and their positions
 ```
 
 ## Installation
@@ -110,6 +111,13 @@ Not wired yet:
   `fault_pin: gpio.37` is in `docs/wiring.md`.
 - **E-stop signal to FluidNC** — the switch is hardwired and cuts power, but the
   controller never hears about it. Hence `$H` after every E-stop.
+
+In progress:
+
+- **Dust shoe load/unload** — `macros/dustshoe_unload.nc` and
+  `dustshoe_load.nc` (macro buttons 2 and 3) are written but the stand
+  positions are not measured. They refuse to run until they are. Park the shoe
+  by hand before any M6. See `docs/dust-shoe.md`.
 
 Not fitted:
 

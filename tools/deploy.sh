@@ -38,6 +38,8 @@ FILES=(
     "${REPO}/macros/tc.nc"
     "${REPO}/macros/measuretool.nc"
     "${REPO}/macros/findzposition.nc"
+    "${REPO}/macros/dustshoe_unload.nc"
+    "${REPO}/macros/dustshoe_load.nc"
 )
 
 api() { curl -sS --max-time 15 --get --data-urlencode "commandText=$1" "http://${BOARD}/command"; }

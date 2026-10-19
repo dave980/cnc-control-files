@@ -33,7 +33,9 @@ $files = @(
     (Join-Path $repo 'config\config.yaml'),
     (Join-Path $repo 'macros\tc.nc'),
     (Join-Path $repo 'macros\measuretool.nc'),
-    (Join-Path $repo 'macros\findzposition.nc')
+    (Join-Path $repo 'macros\findzposition.nc'),
+    (Join-Path $repo 'macros\dustshoe_unload.nc'),
+    (Join-Path $repo 'macros\dustshoe_load.nc')
 )
 
 function Invoke-Api([string]$cmd) {
