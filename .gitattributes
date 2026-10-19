@@ -17,3 +17,5 @@
 *.jpg binary
 *.png binary
 *.pdf binary
+*.stl binary
+*.f3d binary
