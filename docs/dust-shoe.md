@@ -15,43 +15,54 @@ flanges run in the slot along the side of the shoe.
 
 CAD and STLs are in `cad/dust-shoe/`.
 
-## Positions — not measured yet
+## Positions
 
-Both macros carry the same four positions at the top, in G53 machine
-coordinates. Both ship with `ds_park_x = 0`, and **while it is 0 they alarm
-and refuse to run**.
+G53 machine coordinates, given by Dave on 2026-10-19:
 
-| Parameter | What it is |
-|---|---|
-| `ds_park_x`, `ds_park_y` | Spindle XY with the shoe slid fully home on the stand |
-| `ds_clear_x`, `ds_clear_y` | Spindle XY in line with the stand rails, shoe completely off the flanges. Must differ from park only along the slot direction |
-| `ds_engage_z` | Spindle Z with the shoe on and its slot level with the flanges |
-| `ds_lift` | Distance to pull straight up to break the magnets (15 mm default) |
+| Point | X | Y | Z |
+|---|---|---|---|
+| Lead-in (shoe on, clear of the stand) | 1210.000 | 730.000 | −90.000 |
+| Parked (shoe fully home on the stand) | 610.000 | 730.000 | −90.000 |
 
-### Measuring them
+The shoe slides along X at Y730. It travels 600 mm at Z −90: rapid to X660,
+then the last 50 mm into the stand at F1000. Coming out it is the reverse.
+Breaking the magnets is a 15 mm pull from Z −90 to −75 at F300, then a rapid
+to Z0. Picking up is a rapid to Z −75 and a slow F300 descent to −90.
 
-1. Home. Fit the shoe to the spindle by hand. Put **no tool or a short tool** in the collet.
-2. Jog at low speed until the shoe sits fully home on the stand. Record MPos as park X/Y and engage Z.
-3. Jog along the slot direction only until the shoe is fully off the flanges, plus about 10 mm. Record that X/Y as clear.
-4. Enter the same numbers in **both** files, then run `tools/deploy`.
-5. The first run uses feed override at 25% with a hand on feed hold.
+These numbers are in **three places**: `macros/tc.nc`, `macros/dustshoe_unload.nc`
+and `macros/dustshoe_load.nc`. Change all three together.
+
+## In the tool change
+
+`tc.nc` now parks the shoe right after the IR-beam check and before anything
+else moves. It picks the shoe back up after the tool-setter touch-off, then
+returns to the starting XY. So every real `M6` does: shoe off → unload old tool
+→ load new tool → measure → shoe on. An M6 for the tool already loaded is
+bypassed and does not touch the shoe. The moves are inlined rather than
+calling the standalone files, because running a file from inside `tc.nc`
+(itself running inside the job) is untested on this board.
+
+`tc.nc` assumes the shoe is **on the spindle** when an M6 starts. If it isn't,
+unload slides the bare plate past the stand, which is harmless, and load then
+picks the shoe up.
+
+## Standalone macros
+
+For parking or fitting the shoe outside a tool change. Load stops on `M0`
+first and asks a person to confirm the shoe is in the stand. Running it with
+the shoe already on would drive the shoe into the stand.
 
 ## Hazards
 
-- **Running load with the shoe already on drives it into the stand.** Nothing
-  senses the shoe, so load stops on `M0` and asks a person to check. Unload has
-  no such check. Running it with no shoe fitted just slides the bare plate past
-  the stand.
-- **Tool stick-out.** During both macros the tool sits inside the shoe at
-  engage Z. A long tool can reach the stand's base plate. Unload with a short
-  tool or none until the clearance has been checked.
-- **Tool changes.** The brushes hang below the nose, and `tc.nc` drives Z to
-  −105 into the magazine. The shoe must be parked before any `M6`. The macros
-  are not yet called from `tc.nc`.
+- **Long tools.** At Z −90 the tool sits inside the shoe and passes over the
+  stand's base plate. Check stick-out against the stand on the first run.
+- **The 600 mm rapid at Z −90.** It covers X1210 to X660 at Y730. Keep clamps
+  and stock out of that strip, or the brushes will drag through them.
+- **`measuretool.nc` (macro button 0) does not remove the shoe.** It probes
+  from Z0 down to −75 over the setter with the brushes hanging below the nose.
+  Park the shoe first with macro button 2.
 
-## Not done yet
+## First run
 
-- Calling unload/load automatically from `tc.nc`. FluidNC would have to run
-  a file from inside `tc.nc`, which is already running from inside the job,
-  and that nesting is untested on this board. The fallback is to inline the
-  moves into `tc.nc`.
+Do a dry run with feed override at 25% and a hand on feed hold. Run unload
+(button 2), then load (button 3), then an `M6` between two tools.

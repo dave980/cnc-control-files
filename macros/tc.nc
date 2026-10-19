@@ -20,6 +20,15 @@ o1000 else
         (print, IR beam obstructed.)
         $Alarm/Send=3
     o1200 endif
+    (--- Dust shoe off: slide onto the stand at X610 Y730, lift off the magnets ---)
+    (Positions match macros/dustshoe_unload.nc -- change both together)
+    G53 G90 G0 Z0.000
+    G53 G90 G0 X1210.000 Y730.000
+    G53 G90 G0 Z-90.000
+    G53 G90 G0 X660.000
+    G53 G90 G1 X610.000 F1000.0
+    G53 G90 G1 Z-75.000 F300.0
+    G53 G90 G0 Z0.000
     G53 G90 G0 Z0.000
     G43.1 Z0
     G4 P0.1
@@ -103,6 +112,15 @@ o1000 else
         G38.4 G91 Z10.000 F50.0
         G43.1 Z[#5063]
     o1500 endif
+    G53 G90 G0 Z0.000
+    (--- Dust shoe back on: drop onto it at X610 Y730, slide out to X1210 ---)
+    (Positions match macros/dustshoe_load.nc -- change both together)
+    G53 G90 G0 X610.000 Y730.000
+    G53 G90 G0 Z-75.000
+    G53 G90 G1 Z-90.000 F300.0
+    G4 P0.3
+    G53 G90 G1 X660.000 F1000.0
+    G53 G90 G0 X1210.000
     G53 G90 G0 Z0.000
     G53 G90 G0 X[#<_rc_start_x>] Y[#<_rc_start_y>]
     G4 P0

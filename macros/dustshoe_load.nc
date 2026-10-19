@@ -1,15 +1,15 @@
 (dustshoe_load.nc -- pick the magnetic dust shoe up out of its stand)
 (All moves are G53 machine coordinates. Machine Z0 is the ceiling.)
-(The positions MUST match dustshoe_unload.nc -- see docs/dust-shoe.md.)
-(While PARK_X is 0 the macro refuses to run.)
+(Positions match dustshoe_unload.nc and the dust shoe block in tc.nc -- change all three together.)
 
-#<ds_park_x>   = 0.000     (XY where the shoe sits fully home in the stand)
-#<ds_park_y>   = 0.000
-#<ds_clear_x>  = 0.000     (XY in line with the stand rails, shoe fully clear of them)
-#<ds_clear_y>  = 0.000
-#<ds_engage_z> = 0.000     (Z where the spindle plate meets the parked shoe)
+#<ds_park_x>   = 610.000     (XY where the shoe sits fully home in the stand)
+#<ds_park_y>   = 730.000
+#<ds_clear_x>  = 1210.000     (XY in line with the stand rails, shoe fully clear of them)
+#<ds_clear_y>  = 730.000
+#<ds_engage_z> = -90.000     (Z where the spindle plate meets the parked shoe)
 #<ds_lift>     = 15.000    (start the slow descent this far above engage Z)
 #<ds_slide_f>  = 1000.0    (feed for sliding out of the stand)
+#<ds_approach> = 50.000    (last stretch into/out of the stand at slide feed; the rest is rapid)
 #<ds_lift_f>   = 300.0     (feed for the final descent onto the magnets)
 
 o100 if [#<ds_park_x> EQ 0]
@@ -42,7 +42,8 @@ G53 G90 G1 Z[#<ds_engage_z>] F[#<ds_lift_f>]
 G4 P0.3
 
 (Slide the shoe off the stand flanges)
-G53 G90 G1 X[#<ds_clear_x>] Y[#<ds_clear_y>] F[#<ds_slide_f>]
+G53 G90 G1 X[#<ds_park_x> + #<ds_approach>] Y[#<ds_park_y>] F[#<ds_slide_f>]
+G53 G90 G0 X[#<ds_clear_x>] Y[#<ds_clear_y>]
 G53 G90 G0 Z0.000
 
 (Back to where we started, at the ceiling)

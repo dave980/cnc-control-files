@@ -114,10 +114,9 @@ Not wired yet:
 
 In progress:
 
-- **Dust shoe load/unload** — `macros/dustshoe_unload.nc` and
-  `dustshoe_load.nc` (macro buttons 2 and 3) are written but the stand
-  positions are not measured. They refuse to run until they are. Park the shoe
-  by hand before any M6. See `docs/dust-shoe.md`.
+- **Dust shoe load/unload** — `tc.nc` parks the shoe at X610 Y730 before every
+  tool change and refits it afterwards. Standalone versions are on macro buttons
+  2 and 3. Written but not yet dry-run. See `docs/dust-shoe.md`.
 
 Not fitted:
 
