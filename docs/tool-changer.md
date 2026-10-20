@@ -88,7 +88,7 @@ and the lowest the axis goes before an XY move is the −82 approach — both ab
 −105, which happens stationary over a pocket. Nothing traverses while the nose
 is down inside the magazine.
 
-Keep −90 in mind for any hand-written G-code that goes near X1211. Crossing that
+Keep −90 in mind for any hand-written G-code that goes near X−1211. Crossing that
 plane anywhere other than directly over a pocket is what a crash looks like.
 
 ## Speeds and feeds
