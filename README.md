@@ -106,6 +106,8 @@ Working:
   spindle starting. See `docs/vfd-yl620a.md`; the heat discipline is the
   real protection.
 - Y position holds — the left rail was out of parallel; loosened and re-torqued
+- Full Vectric job runs clean (2026-10-20) after fixing a bad X sensor wire that
+  caused a false limit trip; spindle now stops on any alarm
 
 Not wired yet:
 
@@ -114,11 +116,6 @@ Not wired yet:
   `fault_pin: gpio.37` is in `docs/wiring.md`.
 - **E-stop signal to FluidNC** — the switch is hardwired and cuts power, but the
   controller never hears about it. Hence `$H` after every E-stop.
-
-Open:
-
-- **False X limit trips while cutting** — one so far, at 18000 rpm mid-table.
-  Spindle now stops on alarm. Cause not found; see `docs/troubleshooting.md`.
 
 Not fitted:
 

@@ -43,9 +43,9 @@ the **bottom-left** XY datum and zero at the stock's front-left corner.
 
 Cutting at 18000 rpm, the machine alarmed with `Pn:X` at MPos X−639, far from
 the X switch. The debug log showed the X input flicker 0 → 1 → 0. That is a
-spurious signal, not a real trip. The cause is not found yet. Suspects: a loose
-X sensor wire (wiggle-test with the spindle off while polling `?`), or spindle
-noise coupling into the X cable in the drag chain.
+spurious signal, not a real trip. **Cause: a bad X sensor wire**, found and
+fixed 2026-10-20; jobs run clean since. Same lesson as the Z endstop below:
+check the connection before chasing EMI.
 
 The spindle **kept running** through the alarm because `off_on_alarm` was
 `false`. It is now `true`, so any alarm also stops the spindle.
