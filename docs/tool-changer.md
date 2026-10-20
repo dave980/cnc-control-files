@@ -12,21 +12,23 @@ All in G53 machine coordinates. Machine Z0 is at the top, at the home switch.
 
 | Tool | X | Y |
 |---|---|---|
-| 1 | 1211.400 | −85.400 |
-| 2 | 1211.400 | −130.400 |
-| 3 | 1211.400 | −175.400 |
-| 4 | 1211.400 | −220.400 |
-| 5 | 1211.400 | −265.400 |
-| 6 | 1211.400 | −310.400 |
+| 1 | −1211.400 | −85.400 |
+| 2 | −1211.400 | −130.400 |
+| 3 | −1211.400 | −175.400 |
+| 4 | −1211.400 | −220.400 |
+| 5 | −1211.400 | −265.400 |
+| 6 | −1211.400 | −310.400 |
 
-Y is negative because Y0 is at the back switch and +Y points to the back (flipped
-2026-10-19 — before that every Y here was positive, same magnitude).
+X and Y are negative because both home switches sit at the +end: X0 at the right-hand
+switch (facing the front) with +X to the right, Y0 at the back switch with +Y to the
+back. Both axes were flipped on 2026-10-19 so CAM output is not mirrored; before that
+every X and Y here was positive, same magnitude.
 
-Pitch 45.000 mm, base Y−85.400. Tool setter sits at **X1211.000 Y−32.000** — it is
+Pitch 45.000 mm, base Y−85.400. Tool setter sits at **X−1211.000 Y−32.000** — it is
 separate hardware that happens to share an X value with the pockets, so pocket
 corrections do not move it.
 
-**Manual tool changes happen at X1100.000 Y−32.000**, 111 mm clear of the
+**Manual tool changes happen at X−1100.000 Y−32.000**, 111 mm clear of the
 magazine in X. Any tool outside 1-6 — T0, or anything above the magazine's
 range — parks there at machine Z0 and waits on `M0`. It used to park at X0 Y0,
 the home corner.
@@ -181,7 +183,7 @@ IR beam breaks, to establish the magazine's tool recognition zones.
 interaction found on this machine, and it is invisible in hand testing.
 
 The macro used to finish with `G53 G90 G0 Z0.000` and hand control back with
-the spindle still parked at X1211.000 Y−32.000 — directly over the tool setter.
+the spindle still parked at X−1211.000 Y−32.000 — directly over the tool setter.
 That is safe in itself, since machine Z0 is 140 mm above the spoil board. The
 danger is the **next line of the program**.
 

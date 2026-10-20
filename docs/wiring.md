@@ -28,16 +28,17 @@ supply voltage is worth ruling out early rather than late.
 
 | Axis | Pin | Config |
 |---|---|---|
-| X | gpio.42 | `limit_neg_pin: gpio.42:low` |
+| X | gpio.42 | `limit_pos_pin: gpio.42:low` |
 | Y1 | gpio.41 | `limit_pos_pin: gpio.41:low` |
 | Y2 | gpio.40 | `limit_pos_pin: gpio.40:low` |
 | Z | gpio.39 | `limit_pos_pin: gpio.39:low` — Z homes up |
 
-X homes negative (left); Y and Z home positive (back, top). All three home to
-`mpos_mm: 0`, so after `$H` the machine reads 0, 0, 0 at the switches, and the
-working envelope is X 0 to +1220, Y 0 to −1200, Z 0 to −115. Y was flipped on
-2026-10-19 so +Y points to the back, matching Vectric and other CAM — before
-that the switches were `limit_neg_pin` and every carving came out mirrored.
+All three axes home positive: X to the right-hand switch (facing the front), Y to
+the back, Z to the top. All home to `mpos_mm: 0`, so after `$H` the machine reads
+0, 0, 0 at the switches and the working envelope is X 0 to −1220, Y 0 to −1200,
+Z 0 to −115. Facing the front, +X is right, +Y is away, +Z is up — the CAM
+convention. X and Y were both flipped on 2026-10-19; before that they homed
+negative and CAM output came out wrong (see troubleshooting).
 
 ## Spindle — 0-10 V module
 

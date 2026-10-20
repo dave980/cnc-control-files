@@ -22,22 +22,22 @@ Several layers:
 
 ### `MSG:WARN: Limit switches do not support positive homing dir`
 
-Z homes up and Y homes to the back, both positive, so they use `limit_pos_pin`.
-X homes negative and uses `limit_neg_pin`.
+All three axes home positive (X right, Y back, Z up), so all use `limit_pos_pin`.
 
 ### Axes homed the wrong way
 
-`positive_direction: false` for X, `true` for Y and Z. `:low` on X's direction
-pin only; Y1, Y2 and Z are uninverted.
+`positive_direction: true` for X, Y and Z. No direction pin is inverted.
 
-### Carvings came out mirrored / toolpath went the wrong way in Y
+### Vectric toolpaths went the wrong way
 
-Y originally homed to the back as Y0 with +Y toward the operator. CAM assumes
-+Y points away from the operator, so Vectric output was mirrored front-to-back
-and no datum setting could fix it. Fixed 2026-10-19 by flipping Y: direction
-pins uninverted, homing `positive_direction: true`, back switches moved to
-`limit_pos_pin`, and every G53 Y in the macros negated (same physical spots).
-In Vectric use the **bottom-left** XY datum and zero at the stock's front-left.
+The X switch is on the **right** facing the front and Y's are at the back. Both
+homed negative, so +X ran left and +Y ran toward the operator: correct CAM
+orientation only when viewed from behind the machine. Fixed 2026-10-19 by
+flipping both X and Y (homing `positive_direction: true`, switches on
+`limit_pos_pin`, X and Y direction pins uninverted, every G53 X and Y in the
+macros negated; same physical spots). An intermediate state flipped Y only,
+which was mirrored. Now, facing the front: +X right, +Y away. In Vectric use
+the **bottom-left** XY datum and zero at the stock's front-left corner.
 
 ### Hard limit triggered when starting the spindle
 

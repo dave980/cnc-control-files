@@ -2,9 +2,9 @@
 (All moves are G53 machine coordinates. Machine Z0 is the ceiling.)
 (Positions match dustshoe_unload.nc and the dust shoe block in tc.nc -- change all three together.)
 
-#<ds_park_x>   = 1210.000     (XY where the shoe sits fully home in the stand)
+#<ds_park_x>   = -1210.000     (XY where the shoe sits fully home in the stand)
 #<ds_park_y>   = -610.000
-#<ds_clear_x>  = 1210.000     (XY in line with the stand rails, shoe fully clear of them)
+#<ds_clear_x>  = -1210.000     (XY in line with the stand rails, shoe fully clear of them)
 #<ds_clear_y>  = -730.000
 #<ds_engage_z> = -87.500     (Z where the spindle plate meets the parked shoe)
 #<ds_lift>     = 15.000    (start the slow descent this far above engage Z)
