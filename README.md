@@ -98,6 +98,9 @@ Working:
 - Homing on all axes, Y/Y2 auto-squaring
 - Spindle across the full range, including tool-change speeds
 - M6 tool change — load, unload, IR beam verification, tool setter touch-off
+- Dust shoe parked and refitted automatically around every M6 (tested 2026-10-19)
+- Axis directions match CAM: facing the front, +X right, +Y back (X and Y
+  flipped 2026-10-19; Vectric bottom-left datum, zero at the stock's front-left)
 - Magazine verified at **all six pockets** over repeated changes
 - Spindle motor overload left at 15.0 A — the 6 A nameplate value stops the
   spindle starting. See `docs/vfd-yl620a.md`; the heat discipline is the
@@ -112,11 +115,10 @@ Not wired yet:
 - **E-stop signal to FluidNC** — the switch is hardwired and cuts power, but the
   controller never hears about it. Hence `$H` after every E-stop.
 
-In progress:
+Open:
 
-- **Dust shoe load/unload** — `tc.nc` parks the shoe at X−1210 Y−610 before every
-  tool change and refits it afterwards. Standalone versions run with
-  `$Macros/Run=2` and `$Macros/Run=3`. Written but not yet dry-run. See `docs/dust-shoe.md`.
+- **False X limit trips while cutting** — one so far, at 18000 rpm mid-table.
+  Spindle now stops on alarm. Cause not found; see `docs/troubleshooting.md`.
 
 Not fitted:
 

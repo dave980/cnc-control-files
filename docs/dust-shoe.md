@@ -70,7 +70,6 @@ the shoe already on would drive the shoe into the stand.
   from Z0 down to −75 over the setter with the brushes hanging below the nose.
   Park the shoe first with `$Macros/Run=2`.
 
-## First run
+## Status
 
-Do a dry run with feed override at 25% and a hand on feed hold. Run unload
-(`$Macros/Run=2`), then load (`$Macros/Run=3`), then an `M6` between two tools.
+Tested working on 2026-10-19 after the X/Y flip, both inside an `M6` and on its own.
