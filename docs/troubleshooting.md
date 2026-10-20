@@ -39,6 +39,17 @@ macros negated; same physical spots). An intermediate state flipped Y only,
 which was mirrored. Now, facing the front: +X right, +Y away. In Vectric use
 the **bottom-left** XY datum and zero at the stock's front-left corner.
 
+### False X hard limit mid-job (2026-10-19)
+
+Cutting at 18000 rpm, the machine alarmed with `Pn:X` at MPos X−639, far from
+the X switch. The debug log showed the X input flicker 0 → 1 → 0. That is a
+spurious signal, not a real trip. The cause is not found yet. Suspects: a loose
+X sensor wire (wiggle-test with the spindle off while polling `?`), or spindle
+noise coupling into the X cable in the drag chain.
+
+The spindle **kept running** through the alarm because `off_on_alarm` was
+`false`. It is now `true`, so any alarm also stops the spindle.
+
 ### Hard limit triggered when starting the spindle
 
 Looked like VFD noise coupling into the Z endstop wire in the drag chain, and a

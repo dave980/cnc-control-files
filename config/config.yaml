@@ -104,7 +104,7 @@ axes:
   spindown_ms: 0
   tool_num: 0
   speed_map: 0=0.000% 24000=100.000%
-  off_on_alarm: false
+  off_on_alarm: true            # stop the spindle on any alarm (a false X-limit trip at 18000 rpm left it running)
   m6_macro: $LocalFS/Run=tc.nc   # macros live in internal flash, not on the SD card
 
 # --- RapidChange ATC (Premium, 6 pockets) ---
