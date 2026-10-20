@@ -44,30 +44,30 @@ axes:
     max_travel_mm: 1200.000
     homing:
       cycle: 2                    # Two motors with individual limits: auto-squaring on homing
-      positive_direction: false
-      mpos_mm: 0.000
+      positive_direction: true    # Switches are at the BACK. +Y = toward the back (standard CAM
+      mpos_mm: 0.000              # convention), so Y0 is at the back and the table is Y0 to -1200.
       feed_mm_per_min: 200.0
       seek_mm_per_min: 1500.0
       settle_ms: 250
 
     # Y1 Motor (Driver Slot 2)
     motor0:
-      limit_neg_pin: gpio.41:low # Second pin from the left
-      limit_pos_pin: NO_PIN
+      limit_neg_pin: NO_PIN
+      limit_pos_pin: gpio.41:low # Second pin from the left (back switch = +Y end)
       hard_limits: true
       standard_stepper:
         step_pin: i2so.3          # Driver Slot 2
-        direction_pin: i2so.4:low
+        direction_pin: i2so.4      # was :low before Y was flipped 2026-10-19
         disable_pin: i2so.5
 
     # Y2 Motor (Driver Slot 3)
     motor1:
-      limit_neg_pin: gpio.40:low # Third pin from the left
-      limit_pos_pin: NO_PIN
+      limit_neg_pin: NO_PIN
+      limit_pos_pin: gpio.40:low # Third pin from the left (back switch = +Y end)
       hard_limits: true
       standard_stepper:
         step_pin: i2so.6          # Driver Slot 3
-        direction_pin: i2so.7:low
+        direction_pin: i2so.7      # was :low before Y was flipped 2026-10-19
         disable_pin: i2so.8
 
   z:

@@ -21,10 +21,10 @@ G53 machine coordinates, given by Dave on 2026-10-19 (Z corrected from −90 to 
 
 | Point | X | Y | Z |
 |---|---|---|---|
-| Lead-in (shoe on, clear of the stand) | 1210.000 | 730.000 | −87.500 |
-| Parked (shoe fully home on the stand) | 1210.000 | 610.000 | −87.500 |
+| Lead-in (shoe on, clear of the stand) | 1210.000 | −730.000 | −87.500 |
+| Parked (shoe fully home on the stand) | 1210.000 | −610.000 | −87.500 |
 
-The shoe slides along Y at X1210, 120 mm from Y730 to Y610 at F1000. Coming
+The shoe slides along Y at X1210, 120 mm from Y−730 to Y−610 at F1000. Coming
 out it is the reverse.
 Breaking the magnets is a 15 mm pull from Z −87.5 to −72.5 at F300, then a rapid
 to Z0. Picking up is a rapid to Z −72.5 and a slow F300 descent to −87.5.
@@ -64,8 +64,8 @@ the shoe already on would drive the shoe into the stand.
 
 - **Long tools.** At Z −87.5 the tool sits inside the shoe and passes over the
   stand's base plate. Check stick-out against the stand on the first run.
-- **Path at Z −87.5.** The shoe moves X1210, from Y730 to Y610, beside the
-  magazine (pockets run Y85–310 at X1211.4). Keep that space clear.
+- **Path at Z −87.5.** The shoe moves X1210, from Y−730 to Y−610, beside the
+  magazine (pockets run Y−85 to −310 at X1211.4). Keep that space clear.
 - **`measuretool.nc` (config `macro0`) does not remove the shoe.** It probes
   from Z0 down to −75 over the setter with the brushes hanging below the nose.
   Park the shoe first with `$Macros/Run=2`.

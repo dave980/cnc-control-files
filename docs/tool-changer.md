@@ -12,18 +12,21 @@ All in G53 machine coordinates. Machine Z0 is at the top, at the home switch.
 
 | Tool | X | Y |
 |---|---|---|
-| 1 | 1211.400 | 85.400 |
-| 2 | 1211.400 | 130.400 |
-| 3 | 1211.400 | 175.400 |
-| 4 | 1211.400 | 220.400 |
-| 5 | 1211.400 | 265.400 |
-| 6 | 1211.400 | 310.400 |
+| 1 | 1211.400 | −85.400 |
+| 2 | 1211.400 | −130.400 |
+| 3 | 1211.400 | −175.400 |
+| 4 | 1211.400 | −220.400 |
+| 5 | 1211.400 | −265.400 |
+| 6 | 1211.400 | −310.400 |
 
-Pitch 45.000 mm, base Y85.400. Tool setter sits at **X1211.000 Y32.000** — it is
+Y is negative because Y0 is at the back switch and +Y points to the back (flipped
+2026-10-19 — before that every Y here was positive, same magnitude).
+
+Pitch 45.000 mm, base Y−85.400. Tool setter sits at **X1211.000 Y−32.000** — it is
 separate hardware that happens to share an X value with the pockets, so pocket
 corrections do not move it.
 
-**Manual tool changes happen at X1100.000 Y32.000**, 111 mm clear of the
+**Manual tool changes happen at X1100.000 Y−32.000**, 111 mm clear of the
 magazine in X. Any tool outside 1-6 — T0, or anything above the magazine's
 range — parks there at machine Z0 and waits on `M0`. It used to park at X0 Y0,
 the home corner.
@@ -34,8 +37,8 @@ been broken once. And the working height is better: parked over the magazine
 the nose has about 90 mm of clear space beneath it, because the magazine
 occupies the bottom 50 mm — over bare spoil board it is the full 140 mm.
 
-Offset in X rather than Y because Y32 is already near the home end, and moving
-the other way in Y runs into the pockets at Y85.400.
+Offset in X rather than Y because Y−32 is already near the home end, and moving
+the other way in Y runs into the pockets at Y−85.400.
 
 **Machine Z0 is the ceiling.** The axis homes to the top and all travel is
 negative from there, so the park is already as high as the machine goes. More
@@ -178,7 +181,7 @@ IR beam breaks, to establish the magazine's tool recognition zones.
 interaction found on this machine, and it is invisible in hand testing.
 
 The macro used to finish with `G53 G90 G0 Z0.000` and hand control back with
-the spindle still parked at X1211.000 Y32.000 — directly over the tool setter.
+the spindle still parked at X1211.000 Y−32.000 — directly over the tool setter.
 That is safe in itself, since machine Z0 is 140 mm above the spoil board. The
 danger is the **next line of the program**.
 

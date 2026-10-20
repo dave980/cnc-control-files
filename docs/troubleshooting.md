@@ -22,13 +22,22 @@ Several layers:
 
 ### `MSG:WARN: Limit switches do not support positive homing dir`
 
-Z homes up, so it needs `limit_pos_pin`, not `limit_neg_pin`. X and Y home
-negative and use `limit_neg_pin`.
+Z homes up and Y homes to the back, both positive, so they use `limit_pos_pin`.
+X homes negative and uses `limit_neg_pin`.
 
 ### Axes homed the wrong way
 
-`positive_direction: false` for X and Y, `true` for Z, plus `:low` on the
-direction pins for X, Y1 and Y2. Z's direction pin stayed uninverted.
+`positive_direction: false` for X, `true` for Y and Z. `:low` on X's direction
+pin only; Y1, Y2 and Z are uninverted.
+
+### Carvings came out mirrored / toolpath went the wrong way in Y
+
+Y originally homed to the back as Y0 with +Y toward the operator. CAM assumes
++Y points away from the operator, so Vectric output was mirrored front-to-back
+and no datum setting could fix it. Fixed 2026-10-19 by flipping Y: direction
+pins uninverted, homing `positive_direction: true`, back switches moved to
+`limit_pos_pin`, and every G53 Y in the macros negated (same physical spots).
+In Vectric use the **bottom-left** XY datum and zero at the stock's front-left.
 
 ### Hard limit triggered when starting the spindle
 
@@ -115,7 +124,7 @@ works, but it is the tightest margin on the machine — see `tool-changer.md`.
 
 ### Magazine pitch — settled
 
-The 45.000 mm pitch and the Y85.400 base are confirmed: all six pockets have
+The 45.000 mm pitch and the Y85.400 base (Y−85.400 since the 2026-10-19 Y flip) are confirmed: all six pockets have
 been exercised over repeated tool changes.
 
 ### Tool broken on the setter after the first M6 of a program

@@ -20,12 +20,12 @@ o1000 else
         (print, IR beam obstructed.)
         $Alarm/Send=3
     o1200 endif
-    (--- Dust shoe off: slide onto the stand at X1210 Y610, lift off the magnets ---)
+    (--- Dust shoe off: slide onto the stand at X1210 Y-610, lift off the magnets ---)
     (Positions match macros/dustshoe_unload.nc -- change both together)
     G53 G90 G0 Z0.000
-    G53 G90 G0 X1210.000 Y730.000
+    G53 G90 G0 X1210.000 Y-730.000
     G53 G90 G0 Z-87.500
-    G53 G90 G1 Y610.000 F1000.0
+    G53 G90 G1 Y-610.000 F1000.0
     G53 G90 G1 Z-72.500 F300.0
     G53 G90 G0 Z0.000
     G53 G90 G0 Z0.000
@@ -35,11 +35,11 @@ o1000 else
     o1300 if [#<_current_tool> EQ 0]
     o1300 elseif [#<_current_tool> GT 6]
         G53 G90 G0 Z0.000
-        G53 G90 G0 X1100.000 Y32.000
+        G53 G90 G0 X1100.000 Y-32.000
         (print, Tool is out of range. Manually unload tool and cycle start to continue.)
         M0
     o1300 else
-        G53 G90 G0 X1211.400 Y[[[#<_current_tool> - 1] * 45.000] + 85.400]
+        G53 G90 G0 X1211.400 Y[-85.400 - [[#<_current_tool> - 1] * 45.000]]
         G53 G90 G0 Z-82.000
         M4 S2100.0
         G4 P1
@@ -69,7 +69,7 @@ o1000 else
     o1400 if [#<_selected_tool> EQ 0]
         G53 G90 G0 Z0.000
     o1400 elseif [#<_selected_tool> LE 6]
-        G53 G90 G0 X1211.400 Y[[[#<_selected_tool> - 1] * 45.000] + 85.400]
+        G53 G90 G0 X1211.400 Y[-85.400 - [[#<_selected_tool> - 1] * 45.000]]
         G53 G90 G0 Z-82.000
         M3 S1800.0
         G4 P1
@@ -99,26 +99,26 @@ o1000 else
         o1410 endif
     o1400 else
         G53 G90 G0 Z0.000
-        G53 G90 G0 X1100.000 Y32.000
+        G53 G90 G0 X1100.000 Y-32.000
         (print, Tool is out of range. Manually load tool and cycle start to continue.)
         M0
     o1400 endif
     M61 Q[#<_selected_tool>]
     o1500 if [#<_selected_tool> GT 0]
-        G53 G90 G0 X1211.000 Y32.000
+        G53 G90 G0 X1211.000 Y-32.000
         G53 G90 G0 Z0.000
         G38.2 G91 Z-75.000 F600.0
         G38.4 G91 Z10.000 F50.0
         G43.1 Z[#5063]
     o1500 endif
     G53 G90 G0 Z0.000
-    (--- Dust shoe back on: drop onto it at X1210 Y610, slide out to Y730 ---)
+    (--- Dust shoe back on: drop onto it at X1210 Y-610, slide out to Y-730 ---)
     (Positions match macros/dustshoe_load.nc -- change both together)
-    G53 G90 G0 X1210.000 Y610.000
+    G53 G90 G0 X1210.000 Y-610.000
     G53 G90 G0 Z-72.500
     G53 G90 G1 Z-87.500 F300.0
     G4 P0.3
-    G53 G90 G1 Y730.000 F1000.0
+    G53 G90 G1 Y-730.000 F1000.0
     G53 G90 G0 Z0.000
     G53 G90 G0 X[#<_rc_start_x>] Y[#<_rc_start_y>]
     G4 P0
