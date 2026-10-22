@@ -124,6 +124,28 @@ corner radius changes nothing. It matters if you are pushing the stepover up to
 shorten a long job, which is exactly when tramlines appear and the cause is not
 obvious.
 
+## The output is checked before it is written
+
+Every generated line goes through `lint()` before the file is saved, and
+generation fails rather than producing something the controller will reject.
+It checks what a G-code parser cares about: a `(` inside a comment, a `)` with
+no comment open, a comment that never closes, and `;` used as a comment.
+
+This exists because of a real failure. The first version emitted
+
+```
+(3 depth pass(es), 31 lines each)
+```
+
+as line 3. A parser ends a comment at the **first** `)`, so it read the comment
+as `3 depth pass(es`, then tried to execute `, 31 lines each)` and threw
+`error 1, Expected GCode command letter` followed by `ALARM:17`.
+
+The toolpath geometry had been verified carefully — coverage against a 0.5 mm
+grid, pass spacing, depth limits — and none of that was any use, because
+nothing had checked the file was parseable at all. Both checks now run on every
+generation.
+
 ## Before running it
 
 - `$H` first. Soft limits mean nothing unless the machine knows where it is.

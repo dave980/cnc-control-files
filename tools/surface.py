@@ -124,6 +124,34 @@ def interactive(a):
         print(f"\n  {bad}\n  Try again.\n")
 
 
+def lint(lines):
+    """Complaints about anything a G-code parser would reject.
+
+    Exists because a nested paren in a comment - "3 depth pass(es)" - shipped
+    once and alarmed the controller at line 3. The geometry had been checked
+    carefully; that the file parsed at all had not.
+    """
+    out = []
+    for i, line in enumerate(lines, 1):
+        depth = 0
+        for col, ch in enumerate(line):
+            if ch == "(":
+                depth += 1
+                if depth > 1:
+                    out.append(f"line {i} col {col + 1}: '(' inside a comment - "
+                               f"the parser ends the comment at the first ')': {line}")
+            elif ch == ")":
+                depth -= 1
+                if depth < 0:
+                    out.append(f"line {i} col {col + 1}: ')' with no open comment: {line}")
+                    depth = 0
+        if depth:
+            out.append(f"line {i}: comment never closed: {line}")
+        if ";" in line:
+            out.append(f"line {i}: ';' is not a comment in this dialect: {line}")
+    return out
+
+
 def generate(a):
     r = a.tool_dia / 2.0
     x_start = -r - a.lead
@@ -139,7 +167,8 @@ def generate(a):
     e(f"(Surfacing {a.length} x {a.width} mm, removing {a.depth} mm)")
     e(f"(Tool {a.tool_dia} mm, stepover {a.stepover * 100:.0f}% = "
       f"{a.tool_dia * a.stepover:.2f} mm)")
-    e(f"({len(z_levels)} depth pass(es), {len(y_lines)} lines each)")
+    e(f"({len(z_levels)} depth {'pass' if len(z_levels) == 1 else 'passes'}, "
+      f"{len(y_lines)} lines each)")
     e("(Work coordinates. Zero at the front-left corner, Z0 on the surface.)")
     e(f"(Cutter centre spans X {x_start:.3f} to {x_end:.3f}, "
       f"Y {y_lines[0]:.3f} to {y_lines[-1]:.3f})")
@@ -172,8 +201,14 @@ def generate(a):
     e(f"G0 Z{a.safe_z:.3f}")
     e("M5")
     if a.park:
-        e(f"(park) G53 G90 G0 X{a.park[0]:.3f} Y{a.park[1]:.3f}")
+        e("(park)")
+        e(f"G53 G90 G0 X{a.park[0]:.3f} Y{a.park[1]:.3f}")
     e("M30")
+
+    bad = lint(g)
+    if bad:
+        raise AssertionError(
+            "generated G-code would not parse:\n  " + "\n  ".join(bad))
 
     minutes = cut_distance / a.feed if a.feed else 0
     return "\n".join(g) + "\n", {
