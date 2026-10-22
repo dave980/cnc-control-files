@@ -127,10 +127,9 @@ control:
 cover wire before that was abandoned — and it sits in the same header block as
 the limit switches, so the wiring lands next to everything else.
 
-### Only one input is free
+### Only one *opto-isolated* input is free
 
-This constrains everything below. GPIO 36-42 are the entire opto-isolated
-block, and six of the seven are spoken for:
+GPIO 36-42 are the opto-isolated block, and six of the seven are spoken for:
 
 | Pin | Used by |
 |---|---|
@@ -143,7 +142,32 @@ block, and six of the seven are spoken for:
 | gpio.42 | X limit |
 
 The four 5 V outputs (gpio.4, 5, 45, 46) are behind a 74AHCT125 buffer and
-cannot be read back. So `fault_pin` and `estop_pin` cannot both have a pin.
+cannot be read back.
+
+**Other GPIO on the board may still be free** — this section covers the opto
+block only, which is all that has been confirmed here. If more pins are broken
+out, `fault_pin` and `estop_pin` can have one each.
+
+But they are not interchangeable with the opto inputs, and the difference
+decides which signal should get which:
+
+| | Opto block (36-42) | A raw ESP32-S3 pin |
+|---|---|---|
+| Isolation | optocoupler between field wiring and the GPIO | none — direct to the microcontroller |
+| Logic level | field side runs at the `Switch Vcc` jumper, 5 V here | 3.3 V, and most pins are not 5 V tolerant |
+| Pull-up | on the board; never add `:pu` | none unless `:pu` is configured |
+| Noise | the opto is the buffer | whatever the wire picks up reaches the die |
+
+So if a second pin is available, the sensible split is **ALM on gpio.37 and the
+E-stop on the raw pin**, not the other way round. The E-stop contact is a dry
+switch to ground — benign, nothing behind it. The ALM comes from a driver whose
+COM- may sit on the 48 V negative, carried on a wire running beside motor
+cables in a cabinet with a 2.2 kW VFD switching at 13 kHz. That is the signal
+that wants the optocoupler.
+
+Check any candidate pin against the ESP32-S3's own constraints before using it:
+the strapping pins (0, 3, 45, 46) and the flash/PSRAM pins are not free for
+general use, and an input-only pin cannot be driven.
 
 **Wire the ALM.** A driver faulting on position error is invisible to FluidNC
 today, and that is what made the Y drift hunt take as long as it did. The
