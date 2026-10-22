@@ -281,6 +281,11 @@ that exceeds its position-error limit faults and asserts ALM, and from the
 controller's side that is indistinguishable from lost steps — which is exactly
 the symptom that was chased above.
 
+Not yet measured either — prior conversations were searched on 2026-10-22 and
+the ALM pins have never been metered. The multimeter check that happened was
+on the SN04-N endstops (black to blue, confirming open-collector), which is the
+same measurement on the same board and easy to remember as this one.
+
 Plan is in `wiring.md`: `control: fault_pin: gpio.37:low`. The drivers have a
 single ALM pin rather than a floating pair, so the four get paralleled and
 there is no fail-safe series option — meter one driver idle and again under a
