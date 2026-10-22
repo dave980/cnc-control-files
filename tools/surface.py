@@ -39,6 +39,25 @@ def depth_levels(depth, max_doc):
     return [-(i + 1) * step for i in range(n)]
 
 
+def scallop_height(stepover, tool_dia, corner_radius):
+    """Ridge left between adjacent passes, mm. None if the cutter cannot reach.
+
+    The flat part of a cutter with rounded insert corners is tool_dia - 2R
+    wide. While the flats of adjacent passes overlap there is no ridge at all.
+    Past that the overlap falls on the corner arc, and the peak sits midway
+    between the two pass centres.
+    """
+    if corner_radius <= 0:
+        return 0.0
+    flat_half = tool_dia / 2.0 - corner_radius
+    d = stepover / 2.0 - flat_half          # how far past the flat the peak is
+    if d <= 0:
+        return 0.0                          # flats overlap, surface is flat
+    if d >= corner_radius:
+        return None                         # periphery does not reach at all
+    return corner_radius - math.sqrt(corner_radius ** 2 - d ** 2)
+
+
 def generate(a):
     r = a.tool_dia / 2.0
     x_start = -r - a.lead
@@ -111,6 +130,9 @@ def main():
     p.add_argument("--tool-dia", type=float, default=25.4, help="cutter diameter, mm (default 25.4)")
     p.add_argument("--stepover", type=float, default=0.4,
                    help="fraction of cutter diameter, 0-1 (default 0.4)")
+    p.add_argument("--corner-radius", type=float, default=0.0,
+                   help="insert corner radius, mm. The flat part of the cut is "
+                        "tool-dia minus twice this, which is what limits stepover")
     p.add_argument("--doc", type=float, default=0.5, help="max depth per pass, mm (default 0.5)")
     p.add_argument("--feed", type=float, default=2000.0, help="cutting feed, mm/min")
     p.add_argument("--plunge-feed", type=float, default=300.0, help="plunge feed, mm/min")
@@ -129,6 +151,18 @@ def main():
         sys.exit("--stepover must be between 0 and 1")
     if a.doc <= 0:
         sys.exit("--doc must be greater than zero")
+    if a.corner_radius < 0 or a.corner_radius * 2 >= a.tool_dia:
+        sys.exit("--corner-radius must be less than half the cutter diameter")
+
+    step_mm = a.tool_dia * a.stepover
+    ridge = scallop_height(step_mm, a.tool_dia, a.corner_radius)
+    if ridge is None:
+        flat = a.tool_dia - 2 * a.corner_radius
+        sys.exit(f"stepover {step_mm:.2f} mm is too wide for a {a.tool_dia} mm cutter "
+                 f"with a {a.corner_radius} mm corner radius - the periphery does not "
+                 f"reach between passes and material would be left uncut.\n"
+                 f"Keep the stepover at or below {flat:.2f} mm "
+                 f"(--stepover {flat / a.tool_dia:.2f}) for a flat surface.")
 
     text, s = generate(a)
 
@@ -139,6 +173,15 @@ def main():
     else:
         print(text, end="")
 
+    if ridge:
+        flat = a.tool_dia - 2 * a.corner_radius
+        ridge_note = (f"  ridge between passes: {ridge * 1000:.0f} microns "
+                      f"(stepover is past the {flat:.2f} mm flat)\n")
+    elif a.corner_radius:
+        ridge_note = "  flats overlap - no ridge between passes\n"
+    else:
+        ridge_note = ""
+
     print(
         f"\n  {s['depth_passes']} depth pass(es) at {s['doc_each']:.3f} mm each, "
         f"down to Z{s['z_min']:.3f}\n"
@@ -146,8 +189,9 @@ def main():
         f"  cutter centre X {s['x_span'][0]:.1f} to {s['x_span'][1]:.1f}, "
         f"Y {s['y_span'][0]:.1f} to {s['y_span'][1]:.1f}\n"
         f"  {s['cut_distance_m']:.1f} m of cutting, about {s['minutes']:.0f} min at F{a.feed:.0f}\n"
-        f"\n  Work zero must sit so that span fits the machine: "
-        f"X -1220..0, Y -1200..0, Z -115..0.",
+        + ridge_note
+        + f"\n  Work zero must sit so that span fits the machine: "
+          f"X -1220..0, Y -1200..0, Z -115..0.",
         file=sys.stderr)
 
 
