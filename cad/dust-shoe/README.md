@@ -18,5 +18,7 @@ The STL names match the body names in the Fusion browser.
 | Body15 | 235.7 × 117.5 × 25.0 |
 | Body21 | 65.0 × 120.0 × 73.5 |
 | Body27 | 230.0 × 110.4 × 30.0 |
+| Body34 | 300.0 × 33.0 × 4.8 |
 
-Sizes are bounding boxes in the design's orientation, not print orientation.
+Sizes are bounding boxes measured from the STL geometry, in the design's
+orientation rather than print orientation.
