@@ -224,6 +224,39 @@ corner is the maximum and travel runs negative:
 Which matches the table as built. All `G53` coordinates in the three macros
 were checked against this envelope before enabling it — nothing was outside.
 
+#### Jogs behave differently from program moves
+
+This matters because the overrun that prompted all this was a jog.
+
+A program move that would leave the envelope is **rejected whole** — the line
+errors and nothing executes. A jog is **clamped**: it runs and simply stops at
+the boundary. No alarm, nothing to clear, no error message. A jog that appears
+to stop short has not failed, it has hit the fence.
+
+If the machine is already **outside** the envelope, which it may well be right
+after an overrun, the rules change again:
+
+| Situation | Behaviour |
+|---|---|
+| Jogging further out, no switch active | move cancelled on that axis |
+| Jogging further out, switch active | allowed, but capped at the pull-off distance |
+| Jogging into the switch that guards that end | blocked |
+| Jogging back toward the envelope | normal, unrestricted |
+
+The pull-off is not set in this config, so it is FluidNC's default **1.0 mm** —
+that is the most a single jog can move while outside the range. Enough to clear
+a switch, not enough to get anywhere.
+
+**Every one of those cases logs at `Debug` level and nothing higher.** At the
+default message level a cancelled or clamped jog produces no output at all, so
+it looks like the jog did nothing. This is the same trap that made the `M6`
+hunt take as long as it did. Set `$Message/Level=Debug` before testing this and
+the messages are explicit — "Soft limit violation on X", "Jog constrained to
+axis range", "Jog amount limited when outside soft limits".
+
+Homing first makes most of this moot, since the machine then starts inside the
+envelope with a position it can trust.
+
 #### What it still will not catch
 
 - **Anything before `$H`.** The check compares against machine position, and
