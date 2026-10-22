@@ -1,3 +1,10 @@
 *.bak
 *.tmp
 .DS_Store
+
+# Python bytecode - regenerated on every run, was committed by accident
+__pycache__/
+*.pyc
+
+# Generated programs land at the repo root. macros/*.nc are tracked and stay.
+/*.nc

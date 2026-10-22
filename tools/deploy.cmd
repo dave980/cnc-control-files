@@ -34,7 +34,7 @@ if errorlevel 1 (
     echo.
 )
 
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0deploy.ps1" -Board %BOARD%
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0deploy.ps1" -Board %BOARD% -Restart
 
 echo.
 echo ===========================================================
