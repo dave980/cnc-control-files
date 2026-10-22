@@ -198,7 +198,10 @@ feeds the limit arithmetic, but nothing is enforced until the axis also carries
 `soft_limits: true`. Having a travel figure in the file reads like protection
 and is not.
 
-Now set on x, y and z.
+Set on x, y and z, and uploaded to the controller on 2026-10-22. Worth
+stating the second half: a value in `config.yaml` protects nothing until
+`$CD` shows the controller actually holding it. That gap has cost real time
+here before — see the `$SD/Run=` entry above.
 
 #### What it does once enabled
 
