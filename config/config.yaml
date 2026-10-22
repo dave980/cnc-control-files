@@ -21,6 +21,7 @@ axes:
     max_rate_mm_per_min: 3000.0
     acceleration_mm_per_sec2: 150.0
     max_travel_mm: 1220.000
+    soft_limits: true
     homing:
       cycle: 2                    # X and Y home together on cycle 2
       positive_direction: true    # Switch is on the RIGHT (facing the front). +X = right, so
@@ -42,6 +43,7 @@ axes:
     max_rate_mm_per_min: 3000.0
     acceleration_mm_per_sec2: 150.0
     max_travel_mm: 1200.000
+    soft_limits: true
     homing:
       cycle: 2                    # Two motors with individual limits: auto-squaring on homing
       positive_direction: true    # Switches are at the BACK. +Y = toward the back (standard CAM
@@ -75,6 +77,7 @@ axes:
     max_rate_mm_per_min: 2500.0   # Must stay above the F2000 engagement feed in tc.nc
     acceleration_mm_per_sec2: 100.0
     max_travel_mm: 115.000        # -118 = carriage flush with rail end; 3mm buffer.
+    soft_limits: true
                                   # tc.nc reaches -105, so only 10mm spare
     homing:
       cycle: 1                    # Z homes FIRST on cycle 1 to avoid crashing bits

@@ -188,6 +188,54 @@ Worth recording as a method failure too. Three values were chosen by
 arithmetic from the nameplate; two of them stopped the machine. The parameter
 looked like a single threshold and is actually the scaling base for a group.
 
+### The machine drove straight past a soft limit
+
+Because soft limits were never on. `soft_limits` defaults to **false** on every
+axis in FluidNC and the word did not appear anywhere in this config.
+
+`max_travel_mm` alone does not constrain anything. It declares the geometry and
+feeds the limit arithmetic, but nothing is enforced until the axis also carries
+`soft_limits: true`. Having a travel figure in the file reads like protection
+and is not.
+
+Now set on x, y and z.
+
+#### What it does once enabled
+
+Every G0/G1 line is checked before it is planned — `Cartesian::invalid_line()`
+compares the **target** against the axis range and errors the whole line. Jogs
+take a different path, `constrain_jog()`, which clamps the move instead.
+
+The range comes out of homing rather than from `max_travel_mm` directly:
+
+```
+limitsMaxPosition = (positive_direction ? mpos : mpos + max_travel) + slop
+```
+
+With `mpos_mm: 0` and `positive_direction: true` on all three axes, the homed
+corner is the maximum and travel runs negative:
+
+| Axis | Range |
+|---|---|
+| X | -1220 to 0 |
+| Y | -1200 to 0 |
+| Z | -115 to 0 |
+
+Which matches the table as built. All `G53` coordinates in the three macros
+were checked against this envelope before enabling it — nothing was outside.
+
+#### What it still will not catch
+
+- **Anything before `$H`.** The check compares against machine position, and
+  unhomed that number is fiction. Soft limits are not a substitute for homing.
+- **A wrong work offset inside the envelope.** This is the one worth
+  remembering: the tool-setter crash drove to a perfectly legal machine Z. The
+  limit is a machine-coordinate fence, and tool length offsets and work zero
+  are what keep you off the spoil board — see `tool-changer.md`.
+- **The move already running.** It rejects a line up front; it does not stop
+  mid-move. A single long line that starts legal and ends illegal is refused
+  entirely rather than part-executed.
+
 ## Open
 
 ### CL57T alarm outputs are not read by the controller
