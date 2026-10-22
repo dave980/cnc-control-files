@@ -104,6 +104,7 @@ Working:
 - Axis directions match CAM: facing the front, +X right, +Y back (X and Y
   flipped 2026-10-19; Vectric bottom-left datum, zero at the stock's front-left)
 - Magazine verified at **all six pockets** over repeated changes
+- Board surfacing — `tools/surface.py` generates it, run on the machine 2026-10-22
 - Spindle motor overload left at 15.0 A — the 6 A nameplate value stops the
   spindle starting. See `docs/vfd-yl620a.md`; the heat discipline is the
   real protection.
