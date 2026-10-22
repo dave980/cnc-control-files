@@ -161,6 +161,30 @@ and from then on every probed tool puts its tip in the same place.
 Accuracy comes from the F50 back-off, not the F600 seek. The seek only has to
 land somewhere past the trip point.
 
+### G53 ignores tool length offsets
+
+Worth stating on its own, because it is why the macro works and it is a trap
+when typing moves by hand.
+
+`G53` skips the **whole** offset block — work offset and tool length offset
+alike. So `G53 G0 Z-105` puts the **spindle nose** at machine Z-105 whatever is
+in the collet. Every depth in this file describes the nose, not the tool tip,
+which is exactly what the magazine needs: the pockets are at fixed heights and
+the engagement depth must not change when a longer tool is fitted.
+
+The same property bites in hand-written code. A `G53` Z move with a long tool
+fitted puts the tip however far below the number you typed, and no offset
+protects you.
+
+Rule of thumb: **machine-fixed geometry uses `G53`** — pockets, the setter, the
+dust shoe stand, park positions. **Cutting uses work coordinates** and plain
+`G0`/`G1`, where the tool length offset is applied and the tip goes where the
+program means.
+
+`G53` is a modifier, not a motion command: it needs `G0` or `G1` already
+active, or FluidNC returns `GcodeG53InvalidMotionMode`. Jogging is a third
+thing again — `$J=`, which accepts only G90/G91, G20/G21 and G53.
+
 ### What breaks it
 
 - **Touching off work Z zero without a measured tool.** The constant only
