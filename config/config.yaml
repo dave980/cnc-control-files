@@ -129,11 +129,11 @@ macros:
   macro3: $LocalFS/Run=dustshoe_load.nc     # pick dust shoe up from its stand
 
 # --- Driver alarms and E-stop signalling (not yet wired) ---
-# gpio.37 is the ONLY free opto input. 36 probe, 38 IR beam, 39/40/41/42
-# limits. The 5V outputs (4, 5, 45, 46) sit behind a buffer and cannot be
-# read, so there is no second pin: fault_pin and estop_pin cannot both have
-# one. Wire the ALM here first -- a driver fault is invisible to FluidNC
-# today, whereas the E-stop already cuts power and only misreports position.
+# The opto-isolated input block is ten pins, not seven:
+#   42 41 40 39 38 37 36 48 47 3
+# Used: 42/41/40/39 limits, 38 IR beam, 36 probe. Free: 37, 48, 47, 3.
+# So fault_pin and estop_pin can each have an isolated pin.
+# gpio.3 last -- it is an ESP32-S3 strapping pin (JTAG source select).
 #
 # CL57T brings out a single ALM pin returning through COM-, so the four are
 # paralleled; a series chain is not possible. Polarity must be measured

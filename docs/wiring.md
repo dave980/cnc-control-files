@@ -127,65 +127,52 @@ control:
 cover wire before that was abandoned — and it sits in the same header block as
 the limit switches, so the wiring lands next to everything else.
 
-### Only one *opto-isolated* input is free
+### The opto-isolated input block — ten pins, four free
 
-GPIO 36-42 are the opto-isolated block, and six of the seven are spoken for:
+Read off the silkscreen, left to right:
+
+**GPIO.42 · 41 · 40 · 39 · 38 · 37 · 36 · 48 · 47 · 3**
+
+Ten inputs, each with its own optocoupler and 3-pin connector. The block is not
+the contiguous 36-42 range it looks like — 48, 47 and 3 sit on the end.
 
 | Pin | Used by |
 |---|---|
-| gpio.36 | probe / tool setter |
-| **gpio.37** | **free** |
-| gpio.38 | IR beam |
-| gpio.39 | Z limit |
-| gpio.40 | Y2 limit |
-| gpio.41 | Y1 limit |
 | gpio.42 | X limit |
+| gpio.41 | Y1 limit |
+| gpio.40 | Y2 limit |
+| gpio.39 | Z limit |
+| gpio.38 | IR beam |
+| **gpio.37** | **free** |
+| gpio.36 | probe / tool setter |
+| **gpio.48** | **free** |
+| **gpio.47** | **free** |
+| **gpio.3** | **free, but see below** |
+
+So `fault_pin` and `estop_pin` can each have an isolated pin, with two spare.
+Every one of them is optocoupled, has an onboard pull-up (never add `:pu`), and
+takes `:low` for an NPN-NO sensor.
+
+**gpio.3 last.** It is an ESP32-S3 strapping pin — JTAG signal source — as are
+0, 45 and 46, which is why the board spends 45 and 46 on the 5 V outputs and
+these on inputs. An input held active while the board boots can influence a
+strapping pin, so gpio.3 suits something guaranteed inactive at power-up rather
+than a fault line that may well be asserted exactly when you are restarting to
+clear it.
+
+**Suggested allocation:**
+
+| Signal | Pin | Why |
+|---|---|---|
+| CL57T ALM, four ganged | gpio.37 | middle of the block, no strapping role |
+| E-stop spare contact | gpio.47 or gpio.48 | clean pins, no strapping role |
+
+Both being isolated also settles the earlier worry about the ALM: whatever
+COM- turns out to be referenced to, there is an optocoupler between it and the
+microcontroller.
 
 The four 5 V outputs (gpio.4, 5, 45, 46) are behind a 74AHCT125 buffer and
-cannot be read back.
-
-**Other GPIO on the board may still be free** — this section covers the opto
-block only, which is all that has been confirmed here. If more pins are broken
-out, `fault_pin` and `estop_pin` can have one each.
-
-But they are not interchangeable with the opto inputs, and the difference
-decides which signal should get which:
-
-| | Opto block (36-42) | A raw ESP32-S3 pin |
-|---|---|---|
-| Isolation | optocoupler between field wiring and the GPIO | none — direct to the microcontroller |
-| Logic level | field side runs at the `Switch Vcc` jumper, 5 V here | 3.3 V, and most pins are not 5 V tolerant |
-| Pull-up | on the board; never add `:pu` | none unless `:pu` is configured |
-| Noise | the opto is the buffer | whatever the wire picks up reaches the die |
-
-So if a second pin is available, the sensible split is **ALM on gpio.37 and the
-E-stop on the raw pin**, not the other way round. The E-stop contact is a dry
-switch to ground — benign, nothing behind it. The ALM comes from a driver whose
-COM- may sit on the 48 V negative, carried on a wire running beside motor
-cables in a cabinet with a 2.2 kW VFD switching at 13 kHz. That is the signal
-that wants the optocoupler.
-
-Check any candidate pin against the ESP32-S3's own constraints before using it:
-the strapping pins (0, 3, 45, 46) and the flash/PSRAM pins are not free for
-general use, and an input-only pin cannot be driven.
-
-**Wire the ALM.** A driver faulting on position error is invisible to FluidNC
-today, and that is what made the Y drift hunt take as long as it did. The
-E-stop already cuts power — it is performing its real safety function, and
-signalling it only stops the position display from lying afterwards. One is a
-gap in protection, the other is a refinement.
-
-#### Sharing the pin, if you want both
-
-An E-stop contact can join the same input, but the senses fight. An NC contact
-rests closed (pin low) and opens on press; the ALM, if it conducts on alarm,
-rests open and pulls low. One pin has one polarity.
-
-To share, the E-stop needs an **NO** contact so both sources pull low, landing
-both on `fault_pin: gpio.37:low`. Either one then trips the critical alarm and
-you cannot tell which — the behaviour is identical, only the message differs.
-The cost is the fail-safe property: an NC contact announces a broken wire,
-an NO one does not.
+cannot be read back, so they are not candidates.
 
 ### Wiring it
 
