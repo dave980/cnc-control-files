@@ -54,6 +54,7 @@ tools/deploy.cmd                double-clickable launcher for the above
 tools/vfd_dump.py               read the VFD's parameters over Modbus (read only)
 tools/vfd_set.py                write VFD parameters, verified by read-back
 tools/surface.py                generate a board surfacing program
+tools/surface.cmd               double-clickable launcher for the above
 cad/dust-shoe/                  dust shoe — Fusion .f3d and printable STLs
 docs/dust-shoe.md               dust shoe load/unload macros and their positions
 ```

@@ -2,12 +2,49 @@
 
 `tools/surface.py` writes a flattening program. Metric, work coordinates, G54.
 
+**Double-click `tools/surface.cmd`** and it asks for everything. Enter accepts
+the value in brackets. Right-click it, Send to, Desktop for a shortcut.
+
+Run with no options and it does the same from a terminal:
+
+```
+python tools/surface.py
+```
+
+Or supply them, for repeat jobs:
+
 ```
 python tools/surface.py --length 400 --width 300 --depth 1.5 -o surface.nc
 ```
 
 `--length` is X, `--width` is Y, `--depth` is how much material comes off in
-total. Everything else has a default.
+total. Everything else has a default. Both routes produce byte-identical
+output; the prompts only fill in the same values.
+
+Bad combinations are caught before anything is written, and in the prompt
+version it says what is wrong and asks again rather than quitting — your
+answers come back as the defaults, so Enter keeps the ones that were fine.
+
+## A standalone .exe
+
+`tools/surface.cmd` needs Python installed. For a machine without it, there is
+a GitHub Actions workflow that builds a self-contained `surface.exe`:
+
+**Actions** tab -> **build surface.exe** -> **Run workflow**, then download the
+`surface-exe` artifact when it finishes. Nothing to install on the target
+machine.
+
+It builds on GitHub's Windows runner rather than locally because PyInstaller
+compiles natively and cannot cross-compile — an .exe has to be built on
+Windows. The workflow also runs the result once and checks it produced a
+sensible file before publishing it.
+
+To build it yourself on a Windows machine instead:
+
+```
+pip install pyinstaller
+pyinstaller --onefile --console --name surface tools/surface.py
+```
 
 ## Setting up
 

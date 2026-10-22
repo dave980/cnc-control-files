@@ -1,0 +1,45 @@
+# Builds tools/surface.py into a standalone Windows surface.exe.
+#
+# PyInstaller compiles natively and cannot cross-compile, so this has to run on
+# a Windows machine. GitHub supplies one, which saves installing a toolchain.
+#
+# Run it from the Actions tab -> "build surface.exe" -> Run workflow, then
+# download the artifact. The .exe needs no Python on the target machine.
+name: build surface.exe
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - tools/surface.py
+      - .github/workflows/surface-exe.yml
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller==6.11.1
+
+      - name: Build
+        run: pyinstaller --onefile --console --name surface tools/surface.py
+
+      - name: Smoke test the executable
+        run: |
+          dist\surface.exe --length 400 --width 300 --depth 1.5 -o check.nc
+          if (-not (Test-Path check.nc)) { throw "no output produced" }
+          $n = (Get-Content check.nc | Measure-Object -Line).Lines
+          Write-Host "check.nc has $n lines"
+          if ($n -lt 50) { throw "output looks too short" }
+        shell: pwsh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: surface-exe
+          path: dist/surface.exe

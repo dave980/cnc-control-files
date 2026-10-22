@@ -58,6 +58,72 @@ def scallop_height(stepover, tool_dia, corner_radius):
     return corner_radius - math.sqrt(corner_radius ** 2 - d ** 2)
 
 
+def problem(a):
+    """Return a complaint about the settings, or None if they are workable."""
+    for name, val in (("length", a.length), ("width", a.width),
+                      ("depth", a.depth), ("tool diameter", a.tool_dia),
+                      ("depth of cut", a.doc)):
+        if val is None or val <= 0:
+            return f"{name} must be greater than zero"
+    if not 0 < a.stepover <= 1:
+        return "stepover must be between 0 and 1"
+    if a.corner_radius < 0 or a.corner_radius * 2 >= a.tool_dia:
+        return "corner radius must be less than half the cutter diameter"
+    if scallop_height(a.tool_dia * a.stepover, a.tool_dia, a.corner_radius) is None:
+        flat = a.tool_dia - 2 * a.corner_radius
+        return (f"a {a.tool_dia:g} mm cutter with a {a.corner_radius:g} mm corner radius "
+                f"cannot step over {a.tool_dia * a.stepover:.2f} mm - the periphery does "
+                f"not reach between passes and material would be left uncut. "
+                f"Keep the stepover at or below {flat / a.tool_dia:.2f} "
+                f"({flat:.2f} mm)")
+    return None
+
+
+def ask(label, default=None, unit="mm"):
+    """Prompt until a usable number comes back. Enter accepts the default."""
+    while True:
+        shown = f" [{f'{default:g} {unit}'.strip()}]" if default is not None else ""
+        try:
+            raw = input(f"  {label}{shown}: ").strip()
+        except EOFError:
+            if default is not None:
+                print()
+                return default
+            sys.exit("\nnothing to read - pass the values as options instead")
+        if not raw:
+            if default is not None:
+                return default
+            print("      needed")
+            continue
+        try:
+            return float(raw)
+        except ValueError:
+            print("      not a number")
+
+
+def interactive(a):
+    print("Surfacing program. Enter accepts the value in brackets.\n")
+    while True:
+        print(" Board, measured from the front-left corner:")
+        a.length = ask("length along X", a.length)
+        a.width = ask("width along Y", a.width)
+        a.depth = ask("material to remove", a.depth)
+        print("\n Cutter:")
+        a.tool_dia = ask("diameter", a.tool_dia)
+        a.corner_radius = ask("insert corner radius, 0 if square", a.corner_radius)
+        print("\n Cutting:")
+        a.stepover = ask("stepover as a fraction of diameter", a.stepover, unit="")
+        a.doc = ask("max depth per pass", a.doc)
+        a.feed = ask("feed", a.feed, unit="mm/min")
+        a.rpm = int(ask("spindle speed", a.rpm, unit="rpm"))
+        a.safe_z = ask("safe Z above work zero", a.safe_z)
+
+        bad = problem(a)
+        if not bad:
+            return
+        print(f"\n  {bad}\n  Try again.\n")
+
+
 def generate(a):
     r = a.tool_dia / 2.0
     x_start = -r - a.lead
@@ -124,9 +190,9 @@ def generate(a):
 
 def main():
     p = argparse.ArgumentParser(description="Generate a surfacing program (metric, work coordinates)")
-    p.add_argument("--length", type=float, required=True, help="board size along X, mm")
-    p.add_argument("--width", type=float, required=True, help="board size along Y, mm")
-    p.add_argument("--depth", type=float, required=True, help="total material to remove, mm")
+    p.add_argument("--length", type=float, help="board size along X, mm")
+    p.add_argument("--width", type=float, help="board size along Y, mm")
+    p.add_argument("--depth", type=float, help="total material to remove, mm")
     p.add_argument("--tool-dia", type=float, default=25.4, help="cutter diameter, mm (default 25.4)")
     p.add_argument("--stepover", type=float, default=0.4,
                    help="fraction of cutter diameter, 0-1 (default 0.4)")
@@ -142,27 +208,31 @@ def main():
     p.add_argument("--park", type=float, nargs=2, metavar=("X", "Y"),
                    help="machine coordinates to park at when finished (G53)")
     p.add_argument("-o", "--out", help="write here instead of stdout")
+    p.add_argument("--ask", action="store_true",
+                   help="prompt for the values instead of taking them as options "
+                        "(the default when run with no options at all)")
     a = p.parse_args()
 
-    for name, val in (("length", a.length), ("width", a.width), ("tool-dia", a.tool_dia)):
-        if val <= 0:
-            sys.exit(f"--{name} must be greater than zero")
-    if not 0 < a.stepover <= 1:
-        sys.exit("--stepover must be between 0 and 1")
-    if a.doc <= 0:
-        sys.exit("--doc must be greater than zero")
-    if a.corner_radius < 0 or a.corner_radius * 2 >= a.tool_dia:
-        sys.exit("--corner-radius must be less than half the cutter diameter")
+    asking = a.ask or (a.length is None and a.width is None and a.depth is None)
+    if asking:
+        interactive(a)
+        if not a.out:
+            try:
+                name = input("\n  write to [surface.nc]: ").strip()
+            except EOFError:
+                name = ""
+            a.out = name or "surface.nc"
 
-    step_mm = a.tool_dia * a.stepover
-    ridge = scallop_height(step_mm, a.tool_dia, a.corner_radius)
-    if ridge is None:
-        flat = a.tool_dia - 2 * a.corner_radius
-        sys.exit(f"stepover {step_mm:.2f} mm is too wide for a {a.tool_dia} mm cutter "
-                 f"with a {a.corner_radius} mm corner radius - the periphery does not "
-                 f"reach between passes and material would be left uncut.\n"
-                 f"Keep the stepover at or below {flat:.2f} mm "
-                 f"(--stepover {flat / a.tool_dia:.2f}) for a flat surface.")
+    if not asking:
+        missing = [n for n, v in (("--length", a.length), ("--width", a.width),
+                                  ("--depth", a.depth)) if v is None]
+        if missing:
+            sys.exit(f"missing {', '.join(missing)} - supply them, or run with no "
+                     f"options at all to be asked")
+    bad = problem(a)
+    if bad:
+        sys.exit(bad)
+    ridge = scallop_height(a.tool_dia * a.stepover, a.tool_dia, a.corner_radius)
 
     text, s = generate(a)
 
