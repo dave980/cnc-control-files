@@ -266,11 +266,21 @@ That is void twice over: the question it was asking — would this wire bond the
 floating node reads stray coupling rather than a potential, so it could not
 have answered it anyway.
 
-**What is still unmeasured: are the four COM- pins independent of each other?**
-Powered off, probe COM- on one driver against COM- on another. Open means each
-floats separately and they can be chained in series; continuous means they are
-commoned and parallel is the only option. That is the reading that decides the
-topology for a conduct-when-healthy output.
+**The four COM- pins are independent — measured 2026-10-23, OL between COM- on
+two drivers.** So each driver's ALM/COM- is its own floating pair: four
+independent switches, which can be wired in series or in parallel exactly like
+dry contacts.
+
+Both topologies are therefore available, and the polarity decides which:
+
+| ALM output | Topology | Config | Fail-safe? |
+|---|---|---|---|
+| conducts on alarm | parallel — all ALM to signal, all COM- to GND | `fault_pin: gpio.37:low` | no |
+| conducts when healthy | series — signal through each driver in turn to GND | `fault_pin: gpio.37` | **yes** |
+
+There is no wiring that makes the first row fail-safe. A contact that rests
+open cannot report its own broken wire. If it turns out to conduct on alarm,
+the protection is only as good as the last time it was deliberately tested.
 
 #### Establishing which way ALM rests
 
