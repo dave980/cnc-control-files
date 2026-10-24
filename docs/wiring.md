@@ -201,8 +201,13 @@ anything already wired. It needs a wire of its own.
 Two consequences follow, and both are settled by measurement rather than by
 choosing an approach up front:
 
-- **A series chain is impossible.** Four common-emitter outputs sharing COM-
-  cannot be daisy-chained. Parallel is the only wiring-only option.
+- **Whether a series chain is possible depends on COM-.** Measured 2026-10-23:
+  COM- is **not** continuous with the driver's power GND, so the output side is
+  isolated from the 48 V supply rather than referenced to it. That removes the
+  ground-bonding concern entirely, and it means each driver's ALM/COM- may be
+  an independently floating pair — which chains in series like a dry contact.
+  Confirm with a continuity check between COM- on two different drivers, powered
+  off: open means independent, continuous means parallel is the only option.
 - **Whether parallel even works depends on which way the output rests.** If it
   conducts on alarm, paralleling ORs them and all is well. If it conducts when
   healthy, paralleling ANDs them and the arrangement is useless. Establish this
