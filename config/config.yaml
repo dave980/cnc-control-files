@@ -128,19 +128,17 @@ macros:
   macro2: $LocalFS/Run=dustshoe_unload.nc   # park dust shoe in its stand
   macro3: $LocalFS/Run=dustshoe_load.nc     # pick dust shoe up from its stand
 
-# --- Driver alarms and E-stop signalling (not yet wired) ---
-# The opto-isolated input block is ten pins, not seven:
-#   42 41 40 39 38 37 36 48 47 3
-# Used: 42/41/40/39 limits, 38 IR beam, 36 probe. Free: 37, 48, 47, 3.
-# So fault_pin and estop_pin can each have an isolated pin.
-# gpio.3 last -- it is an ESP32-S3 strapping pin (JTAG source select).
+# --- Driver alarms ---
+# ALM rests open and pulls low on alarm: measured 2026-10-24 on the Z driver,
+# 0 healthy and 1 with the driver alarmed, so the four are wired in parallel.
+# All ALM to gpio.37 signal, all COM- to that connector's GND.
 #
-# CL57T brings out a single ALM pin returning through COM-, so the four are
-# paralleled; a series chain is not possible. Polarity must be measured
-# before wiring all four -- see docs/wiring.md, which also covers why
-# conduct-when-healthy would break the parallel arrangement entirely.
-# control:
-#   fault_pin: gpio.37:low     # four CL57T ALM outputs, paralleled
+# The opto-isolated input block is ten pins: 42 41 40 39 38 37 36 48 47 3.
+# Used: 42/41/40/39 limits, 38 IR beam, 36 probe, 37 driver alarms.
+# Free: 48, 47, 3 - gpio.3 last, it is an ESP32-S3 strapping pin.
+# estop_pin can have 47 or 48 when a spare contact is fitted.
+control:
+  fault_pin: gpio.37:low
 
 spi:
   miso_pin: gpio.2

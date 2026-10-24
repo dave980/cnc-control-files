@@ -223,7 +223,7 @@ If it conducts when healthy, and the COM- pins are independent, a series chain
 gives the opposite: an open loop is itself an alarm, so a broken wire announces
 itself. That is the better outcome of the two.
 
-#### Open question: the driver does not raise its alarm
+#### Why the driver would not alarm — resolved
 
 With the Z driver's encoder unplugged **at the driver** and Z commanded to move
 10 mm, the axis moved and the red PWR/ALM LED never lit. A closed-loop driver
@@ -331,19 +331,23 @@ two drivers.** So each driver's ALM/COM- is its own floating pair: four
 independent switches, which can be wired in series or in parallel exactly like
 dry contacts.
 
-**The output rests open — measured 2026-10-23.** With the Z driver healthy,
-`M66 P1 L0` reads 0; bridging the ALM and COM- wires together reads 1. The
-bridge is what makes the 0 meaningful: it proves gpio.37 works, that `:low` is
-live, and that ALM and COM- are on the signal and GND pins rather than
-somewhere else. Without that step a healthy 0 is indistinguishable from a
-circuit that was never connected.
+**Settled by demonstration on 2026-10-24:**
+
+| Driver state | `M66 P1 L0` | Meaning |
+|---|---|---|
+| healthy | 0 | ALM open |
+| ALM and COM- bridged by hand | 1 | input, `:low` and both wire landings proven |
+| genuinely alarmed | **1** | ALM pulls low on alarm |
+
+The third row took the longest to get because the driver would not alarm while
+SW6 had it in open loop. Once SW6 was off, pulling the encoder and commanding a
+move raised a real alarm, and gpio.37 followed it.
 
 **So: parallel, `fault_pin: gpio.37:low`.** All four ALM to the signal pin, all
 four COM- to GND. This is the fail-silent arrangement, so it only stays good if
 it is deliberately re-tested after any work in the cabinet.
 
-What is *not* demonstrated is the output actually closing on alarm — see the
-open question below. Both topologies were available:
+Both topologies were available:
 
 | ALM output | Topology | Config | Fail-safe? |
 |---|---|---|---|

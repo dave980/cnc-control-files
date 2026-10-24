@@ -280,24 +280,26 @@ envelope with a position it can trust.
   mid-move. A single long line that starts legal and ends illegal is refused
   entirely rather than part-executed.
 
+### Driver alarms now reach the controller
+
+`control: fault_pin: gpio.37:low`, with the four ALM outputs in parallel and
+all four COM- on that connector's GND.
+
+Three readings settled it: 0 healthy, 1 with the ALM and COM- wires bridged by
+hand, and 1 with the driver genuinely alarmed. The middle one matters as much
+as the others — without it a healthy 0 cannot be told apart from a circuit that
+was never connected, which is exactly what the first few readings turned out to
+be.
+
+The reason it took a whole evening is that the driver would not alarm. SW6 was
+on, putting it in open loop, so no position error was ever computed. With SW6
+off, pulling the encoder and commanding a move alarmed it immediately. Full
+detail in `wiring.md`.
+
+**It fails silent.** A broken ALM wire removes that driver's protection with no
+indication. Re-test deliberately after any work in the cabinet.
+
 ## Open
-
-### CL57T alarm outputs are not read by the controller
-
-The four drivers have ALM outputs and nothing is connected to them. A driver
-that exceeds its position-error limit faults and asserts ALM, and from the
-controller's side that is indistinguishable from lost steps — which is exactly
-the symptom that was chased above.
-
-Not yet measured either — prior conversations were searched on 2026-10-22 and
-the ALM pins have never been metered. The multimeter check that happened was
-on the SN04-N endstops (black to blue, confirming open-collector), which is the
-same measurement on the same board and easy to remember as this one.
-
-Plan is in `wiring.md`: `control: fault_pin: gpio.37:low`. The drivers have a
-single ALM pin rather than a floating pair, so the four get paralleled and
-there is no fail-safe series option — meter one driver idle and again under a
-forced alarm to settle the polarity before wiring.
 
 ### The E-stop is not signalled to FluidNC
 
