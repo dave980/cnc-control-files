@@ -234,7 +234,22 @@ the reassurance recorded under the Y drift entry — that these drivers correct
 position error rather than dropping steps silently — does not hold for it, and
 a position-error alarm can never fire no matter how the wire is run.
 
-**The likely cause is SW6.** From the mode table on the driver:
+**SW6 is on — the driver is in open loop.** Read off the Z driver's switch bank
+on 2026-10-23 (`ON` is the down position):
+
+| SW | State | Meaning |
+|---|---|---|
+| 1-4 | on, off, on, on | 1600 pulse/rev — matches `steps_per_mm: 320` on a 5 mm lead |
+| 5 | off | DIR = CCW |
+| **6** | **on** | **Control Mode = Open** |
+| 7 | off | Pulse Mode = Pul/Dir |
+| 8 | on | Pulse Filter = Yes |
+
+So the encoder is wired and ignored. That explains the whole investigation: no
+position error is computed, so nothing can alarm, so ALM never asserts however
+the wire is run.
+
+From the mode table on the driver:
 
 | SW6 | Control Mode |
 |---|---|

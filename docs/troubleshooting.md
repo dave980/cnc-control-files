@@ -116,6 +116,14 @@ Things that turned out not to be the cause, for the record:
   limit they fault and assert ALM, which looks exactly like lost steps if ALM is
   not wired back to the controller.
 
+  **This was wrong.** On 2026-10-23 the Z driver was found with SW6 on, which
+  the mode table calls Control Mode = Open: the encoder is connected and
+  ignored. An open-loop driver corrects nothing and can lose steps silently,
+  which is exactly what was ruled out here. The rail really was out of parallel
+  and re-torquing it really did fix the drift, so the conclusion stands — but
+  it stood on a premise that did not hold, and lost steps should not have been
+  dismissed on those grounds. Check all four drivers.
+
 ### Z had no max_travel_mm
 
 X and Y declared their travel but the Z block did not, so Z fell back to
