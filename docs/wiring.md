@@ -250,27 +250,27 @@ unconnected. Worth being deliberate about: BRK asserts during *normal*
 operation, so on `fault_pin` it gives either a permanent alarm or a permanently
 healthy input, and both read as a config problem rather than a wiring one.
 
-#### What COM- is tied to, before bonding it
+#### What COM- is tied to — measured 2026-10-23
 
-The control inputs are opto-isolated, but COM- is the driver's internal logic
-common, and on drivers of this kind that is generally referenced to the power
-ground — the 48 V supply's **negative**, not 48 V itself. So the wire from COM-
-to the Doberman's input GND may **bond the motor supply's negative to the logic
-ground**. That is a different decision from landing a signal, and it should be
-made deliberately.
+Powered off, probing COM- against that driver's `GND` power terminal: **not
+continuous.** The ALM output side is isolated from the 48 V supply rather than
+referenced to it.
 
-Two checks:
+So connecting COM- to the input header GND ties a floating node to board
+ground. Nothing is bonded, there is no ground loop to engineer around, and the
+star-ground advice that used to sit here does not apply.
 
-- Powered off, driver disconnected: continuity from COM- to the driver's `GND`
-  power terminal. Continuity means COM- *is* the power ground.
-- Powered: DC volts from COM- to the Doberman input GND. Near 0 V means they are
-  already effectively common and the wire changes nothing. A volt or more means
-  they are not, and the wire creates the bond.
+An earlier draft also called for measuring DC volts from COM- to board ground.
+That is void twice over: the question it was asking — would this wire bond the
+48 V negative to logic ground — is already answered no, and a voltmeter on a
+floating node reads stray coupling rather than a potential, so it could not
+have answered it anyway.
 
-If they are not already common, bond at **one** point — a star ground — rather
-than adding four parallel return paths through the ALM harnesses. Four COM-
-wires running alongside motor cables is a ground loop with motor current in it,
-and that is how a perfectly good endstop starts behaving the way the Z one did.
+**What is still unmeasured: are the four COM- pins independent of each other?**
+Powered off, probe COM- on one driver against COM- on another. Open means each
+floats separately and they can be chained in series; continuous means they are
+commoned and parallel is the only option. That is the reading that decides the
+topology for a conduct-when-healthy output.
 
 #### Establishing which way ALM rests
 
