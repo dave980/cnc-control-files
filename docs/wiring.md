@@ -234,10 +234,35 @@ the reassurance recorded under the Y drift entry — that these drivers correct
 position error rather than dropping steps silently — does not hold for it, and
 a position-error alarm can never fire no matter how the wire is run.
 
-Worth checking: the SW5-SW8 mode switches on the driver, and whether the motor
-behaves any differently with the encoder connected versus unplugged. If it
-holds position and resists being turned identically either way, it is running
-open-loop.
+**The likely cause is SW6.** From the mode table on the driver:
+
+| SW6 | Control Mode |
+|---|---|
+| off | **Close** — closed loop |
+| on | **Open** — open loop |
+
+With SW6 on, the driver ignores the encoder entirely. Pulling the encoder then
+changes nothing, position error is never computed, and ALM cannot assert — which
+matches every observation. The red PWR/ALM LED was confirmed unlit from a
+close-up, so the driver genuinely is not alarming rather than alarming without
+the signal reaching the board.
+
+If SW6 turns out to be on, that axis is not closed loop and the `fault_pin`
+protects nothing on it until the switch is changed.
+
+### While the driver is out: check S1
+
+The S1 current dial sits between the 9 and A detents in the photo, and the two
+are not equivalent:
+
+| Code | Peak | RMS |
+|---|---|---|
+| 4-9 | 5.6 A | 4 A |
+| A-F | 7.0 A | 5 A |
+
+The 24E1K-30 is rated 5.0 A RMS, so it wants A-F. On 9 it runs at 80 % current,
+roughly 20 % down on torque — worth confirming on a gantry that has already had
+a binding rail.
 
 #### The driver's connectors
 
