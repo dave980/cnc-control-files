@@ -299,6 +299,25 @@ detail in `wiring.md`.
 **It fails silent.** A broken ALM wire removes that driver's protection with no
 indication. Re-test deliberately after any work in the cabinet.
 
+### Driver alarms: wired, config not yet deployed, wires not yet verified
+
+All four ALM joined to gpio.37's signal pin and all four COM- to its GND, as of
+2026-10-24. What has not happened yet:
+
+1. Meter signal to GND at the board with everything healthy — expect ~5 V. If
+   it reads near 0, one driver is holding the input low, and deploying
+   `fault_pin` would give a critical alarm on every boot.
+2. Deploy and restart. Coming up without a critical alarm confirms all four are
+   healthy.
+3. **Verify each driver individually**: pull one encoder, command a short move
+   on that axis, confirm FluidNC raises a critical alarm, soft reset, reconnect,
+   repeat. Four tests.
+
+Step 3 is the one that matters and the one easiest to skip. In parallel a dead
+ALM wire is invisible — the other three keep the input looking healthy — so
+without testing each in turn there is no way to know all four are actually
+landed. Only one of the four has ever been proven to work.
+
 ## Open
 
 ### The E-stop is not signalled to FluidNC
