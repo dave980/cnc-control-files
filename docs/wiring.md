@@ -265,19 +265,23 @@ the signal reaching the board.
 If SW6 turns out to be on, that axis is not closed loop and the `fault_pin`
 protects nothing on it until the switch is changed.
 
-### While the driver is out: check S1
+**SW6 set to off on all four drivers 2026-10-23.** The machine is now actually
+closed loop. First symptom afterwards: the Z driver's ALM blinks red when Z
+moves — under investigation, with the encoder's reconnection and its count
+direction the first two things to check.
 
-The S1 current dial sits between the 9 and A detents in the photo, and the two
-are not equivalent:
+### S1 is set to A
+
+Confirmed on the dial: **A**, which is 7.0 A peak / 5 A RMS and correct for the
+24E1K-30's 5.0 A rating. For reference, 9 would have been one detent away and
+meaningfully different:
 
 | Code | Peak | RMS |
 |---|---|---|
 | 4-9 | 5.6 A | 4 A |
 | A-F | 7.0 A | 5 A |
 
-The 24E1K-30 is rated 5.0 A RMS, so it wants A-F. On 9 it runs at 80 % current,
-roughly 20 % down on torque — worth confirming on a gantry that has already had
-a binding rail.
+On 9 it would have run at 80 % current, roughly 20 % down on torque.
 
 #### The driver's connectors
 
