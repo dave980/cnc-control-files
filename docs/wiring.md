@@ -223,6 +223,22 @@ If it conducts when healthy, and the COM- pins are independent, a series chain
 gives the opposite: an open loop is itself an alarm, so a broken wire announces
 itself. That is the better outcome of the two.
 
+#### Open question: the driver does not raise its alarm
+
+With the Z driver's encoder unplugged **at the driver** and Z commanded to move
+10 mm, the axis moved and the red PWR/ALM LED never lit. A closed-loop driver
+that has lost its feedback should fault well inside one revolution.
+
+This matters beyond the alarm wiring. If that driver is not closing the loop,
+the reassurance recorded under the Y drift entry — that these drivers correct
+position error rather than dropping steps silently — does not hold for it, and
+a position-error alarm can never fire no matter how the wire is run.
+
+Worth checking: the SW5-SW8 mode switches on the driver, and whether the motor
+behaves any differently with the encoder connected versus unplugged. If it
+holds position and resists being turned identically either way, it is running
+open-loop.
+
 #### The driver's connectors
 
 From the label on the driver itself:
@@ -271,7 +287,19 @@ two drivers.** So each driver's ALM/COM- is its own floating pair: four
 independent switches, which can be wired in series or in parallel exactly like
 dry contacts.
 
-Both topologies are therefore available, and the polarity decides which:
+**The output rests open — measured 2026-10-23.** With the Z driver healthy,
+`M66 P1 L0` reads 0; bridging the ALM and COM- wires together reads 1. The
+bridge is what makes the 0 meaningful: it proves gpio.37 works, that `:low` is
+live, and that ALM and COM- are on the signal and GND pins rather than
+somewhere else. Without that step a healthy 0 is indistinguishable from a
+circuit that was never connected.
+
+**So: parallel, `fault_pin: gpio.37:low`.** All four ALM to the signal pin, all
+four COM- to GND. This is the fail-silent arrangement, so it only stays good if
+it is deliberately re-tested after any work in the cabinet.
+
+What is *not* demonstrated is the output actually closing on alarm — see the
+open question below. Both topologies were available:
 
 | ALM output | Topology | Config | Fail-safe? |
 |---|---|---|---|
