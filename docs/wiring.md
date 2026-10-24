@@ -213,12 +213,15 @@ choosing an approach up front:
   healthy, paralleling ANDs them and the arrangement is useless. Establish this
   on one driver before wiring four.
 
-If it conducts on alarm, the arrangement **fails silent**: a broken ALM wire or
-a connector knocked off removes that driver's protection with no indication, and
-the input sits healthy forever. A series chain of floating contacts would have
-caught that, because an open loop is itself an alarm — but that option does not
-exist here. So the protection is only as good as the last time it was tested.
-Test it deliberately, and re-test after any work in the cabinet.
+If it conducts on alarm, parallel is the arrangement and it **fails silent**: a
+broken ALM wire or a connector knocked off removes that driver's protection with
+no indication, and the input sits healthy forever. So the protection is only as
+good as the last time it was tested — test it deliberately, and re-test after
+any work in the cabinet.
+
+If it conducts when healthy, and the COM- pins are independent, a series chain
+gives the opposite: an open loop is itself an alarm, so a broken wire announces
+itself. That is the better outcome of the two.
 
 #### The driver's connectors
 
@@ -293,7 +296,14 @@ driver and let the firmware read it.
 | Healthy | Alarmed | Output | Consequence |
 |---|---|---|---|
 | 0 | 1 | Conducts on alarm | Parallel all four, `fault_pin: gpio.37:low` |
-| 1 | 0 | Conducts when healthy | Parallel **ANDs** — needs a PC817 per driver |
+| 1 | 0 | Conducts when healthy | Series chain, `fault_pin: gpio.37` — fail-safe |
+
+Parallel is wrong for the second row: four outputs that conduct when healthy
+keep the pin held low by the three healthy drivers while the fourth faults, so
+nothing fires until all four have gone. Chain them instead — gpio.37's signal
+through each driver in turn and back to GND — which needs the COM- pins to be
+independent, per the continuity check above. If they are commoned, that case
+needs a PC817 per driver with the transistors paralleled.
 
 Test through `user_inputs` rather than `fault_pin` because `fault_pin` raises a
 *critical* alarm that only a soft reset clears, and a soft reset sets
