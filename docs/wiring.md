@@ -400,6 +400,58 @@ Once the sense is known, drop the temporary `digital1_pin`, wire the remaining
 three, and move gpio.37 to `control: fault_pin:` with the polarity the test
 gave.
 
+### Signalling the E-stop — the supply's DC OK contact
+
+The E-stop cuts **mains into the 48 V supply**, so the rail decays as the
+capacitors drain rather than dropping instantly. That rules out sensing the
+rail with a 48 V relay coil, which would not release until the rail fell to
+roughly 20 V.
+
+The XDR-960E-48 has a **built-in DC OK relay contact** — an isolated dry
+contact that tracks whether the output is within tolerance. It opens at around
+43 V, so it fires early in the decay rather than at the end of it, and it needs
+no added components.
+
+**Terminals:** the 4-way push-in block on the front is split — the **top two
+are DC OK**, the bottom two are Parallel Use for current sharing between
+supplies. Do not touch the lower pair. Push-in spring terminals, so ferrules or
+solid core.
+
+```
+gpio.47 signal ── DC OK ── gpio.47 GND
+```
+
+```yaml
+control:
+  fault_pin: gpio.37:low     # four CL57T alarms, paralleled
+  estop_pin: gpio.47         # DC OK contact, no :low
+```
+
+| State | DC OK | Pin | FluidNC |
+|---|---|---|---|
+| running | closed | low | inactive |
+| E-stop pressed | opens as the output decays | high | **alarm** |
+| broken wire | open | high | **alarm** |
+
+Fail-safe, unlike the driver alarms: a cut or disconnected wire reads as
+pressed. The board's input LED for that pin sits **lit continuously** in normal
+operation, because the closed contact holds it low. That is correct, not a
+fault.
+
+**Confirm the contact's sense before trusting it.** Meter continuity across the
+DC OK pair: closed with the supply on, open with it off. If it reads the other
+way, add `:low`.
+
+**It covers more than the button.** DC OK says the 48 V output is not good,
+which catches a mains failure, a blown fuse, and the supply shutting down on
+overload or over-temperature — every case where the drivers have no power and
+the position on screen has become fiction.
+
+`estop_pin` and `fault_pin` are the same handler in FluidNC, so the behaviour is
+identical; only the status letter differs, `Pn:E` against `Pn:F`. That is the
+reason to use the separate key rather than ganging onto gpio.37 — the status
+line then says which one tripped.
+
 ### Testing it
 
 Two stages, because they fail differently.
