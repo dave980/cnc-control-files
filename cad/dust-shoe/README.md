@@ -6,6 +6,7 @@ Dust removal system for the mill, designed in Autodesk Fusion.
 |---|---|
 | `cnc-dust-shoe.f3d` | Fusion archive — in Fusion, File → Open → Open from my computer |
 | `stl/*.stl` | One binary STL per dust shoe body, in millimetres |
+| `stl/solid-brush.3mf` | Solid alternative to the brush, 3MF with print settings |
 
 The STL names match the body names in the Fusion browser.
 
