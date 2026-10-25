@@ -5,21 +5,22 @@ Dust removal system for the mill, designed in Autodesk Fusion.
 | File | What |
 |---|---|
 | `cnc-dust-shoe.f3d` | Fusion archive — in Fusion, File → Open → Open from my computer |
-| `stl/*.stl` | One binary STL per dust shoe body, in millimetres |
-| `stl/solid-brush.3mf` | Solid alternative to the brush, 3MF with print settings |
+| `print/*.stl` | One binary STL per dust shoe body, in millimetres |
+| `print/solid-brush.3mf` | Solid alternative to the brush, 3MF with print settings |
 
-The STL names match the body names in the Fusion browser.
+`print/` holds the meshes to print; the names match the body names in the
+Fusion browser. The `.f3d` is the source, `print/` is what comes out of it.
 
 | Part | File | Size (mm) |
 |---|---|---|
-| Top Shoe | `top-shoe.stl` | 230.0 x 110.4 x 60.0 |
-| Bottom Shoe | `bottom-shoe.stl` | 230.0 x 110.4 x 30.0 |
-| Shoe Brush | `shoe-brush.stl` | 300.0 x 33.0 x 4.8 |
-| Shoe Dock | `shoe-dock.stl` | 65.0 x 120.0 x 73.5 |
-| Hose Holder Front | `hose-holder-front.stl` | 235.7 x 117.5 x 25.0 |
-| Hose Holder Rear | `hose-holder-rear.stl` | 228.1 x 116.0 x 25.0 |
-| Spindle Holder 1 | `spindle-holder-1.stl` | 158.0 x 37.5 x 108.0 |
-| Spindle Holder 2 | `spindle-holder-2.stl` | 158.0 x 37.5 x 108.0 |
+| Top Shoe | `print/top-shoe.stl` | 230.0 x 110.4 x 60.0 |
+| Bottom Shoe | `print/bottom-shoe.stl` | 230.0 x 110.4 x 30.0 |
+| Shoe Brush | `print/shoe-brush.stl` | 300.0 x 33.0 x 4.8 |
+| Shoe Dock | `print/shoe-dock.stl` | 65.0 x 120.0 x 73.5 |
+| Hose Holder Front | `print/hose-holder-front.stl` | 235.7 x 117.5 x 25.0 |
+| Hose Holder Rear | `print/hose-holder-rear.stl` | 228.1 x 116.0 x 25.0 |
+| Spindle Holder 1 | `print/spindle-holder-1.stl` | 158.0 x 37.5 x 108.0 |
+| Spindle Holder 2 | `print/spindle-holder-2.stl` | 158.0 x 37.5 x 108.0 |
 
 Sizes are bounding boxes measured from the STL geometry, in the design's
 orientation rather than print orientation.
