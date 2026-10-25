@@ -296,27 +296,26 @@ on, putting it in open loop, so no position error was ever computed. With SW6
 off, pulling the encoder and commanding a move alarmed it immediately. Full
 detail in `wiring.md`.
 
-**It fails silent.** A broken ALM wire removes that driver's protection with no
-indication. Re-test deliberately after any work in the cabinet.
+**All four verified individually on 2026-10-24.** Each driver's encoder was
+unplugged in turn and the axis commanded to move; every one produced the same
+result:
 
-### Driver alarms: wired, config not yet deployed, wires not yet verified
+```
+[MSG:DBG: fault_pin 1]
+[MSG:INFO: Stopped by fault_pin]
+[MSG:INFO: ALARM: Hard Stop]
+ALARM:13
+<Alarm|...|Pn:F>
+[MSG:ERR: Reset to continue]
+```
 
-All four ALM joined to gpio.37's signal pin and all four COM- to its GND, as of
-2026-10-24. What has not happened yet:
+**It fails silent, so that test is the maintenance task.** All four ALM outputs
+rest open, so the input reads healthy whether four wires are landed or one.
+Nothing short of making each driver alarm will tell you they are all still
+connected. Repeat it after any work in the cabinet.
 
-1. Meter signal to GND at the board with everything healthy — expect ~5 V. If
-   it reads near 0, one driver is holding the input low, and deploying
-   `fault_pin` would give a critical alarm on every boot.
-2. Deploy and restart. Coming up without a critical alarm confirms all four are
-   healthy.
-3. **Verify each driver individually**: pull one encoder, command a short move
-   on that axis, confirm FluidNC raises a critical alarm, soft reset, reconnect,
-   repeat. Four tests.
-
-Step 3 is the one that matters and the one easiest to skip. In parallel a dead
-ALM wire is invisible — the other three keep the input looking healthy — so
-without testing each in turn there is no way to know all four are actually
-landed. Only one of the four has ever been proven to work.
+`Pn:F` in the status report is the quick check — `?` lists active control pins,
+so it says whether the fault input is asserted right now without a meter.
 
 ## Open
 

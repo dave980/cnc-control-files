@@ -111,16 +111,17 @@ Working:
   spindle starting. See `docs/vfd-yl620a.md`; the heat discipline is the
   real protection.
 - Y position holds — the left rail was out of parallel; loosened and re-torqued
+- Driver faults stop the machine — all four CL57T alarms on `fault_pin: gpio.37:low`,
+  each verified individually
+- Closed loop actually enabled — SW6 was on, so all four were running open loop
 - Full Vectric job runs clean (2026-10-20) after fixing a bad X sensor wire that
   caused a false limit trip; spindle now stops on any alarm
 
 Not wired yet:
 
-- **CL57T ALM outputs** — the drivers have alarm outputs and nothing reads
-  them, so a driver faulting on position error looks like lost steps. Plan for
-  `fault_pin: gpio.37` is in `docs/wiring.md`.
 - **E-stop signal to FluidNC** — the switch is hardwired and cuts power, but the
-  controller never hears about it. Hence `$H` after every E-stop.
+  controller never hears about it. Hence `$H` after every E-stop. gpio.47 or
+  gpio.48 is free for it.
 
 Not fitted:
 
