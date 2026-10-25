@@ -421,35 +421,28 @@ solid core.
 gpio.47 signal ── DC OK ── gpio.47 GND
 ```
 
-**Measured 2026-10-24: the contact is open with the supply on, closed with it
-off** — the opposite of the usual arrangement, and worth having checked rather
-than assumed.
+**The contact is closed while the output is good.** Settled on the live pin:
+with the supply up, gpio.47 signal to GND reads 0 V. An earlier continuity
+check across the terminals had it the other way round and briefly sent the
+config wrong; the pin itself is the authority.
 
 ```yaml
 control:
   fault_pin: gpio.37:low     # four CL57T alarms, paralleled
-  estop_pin: gpio.47:low     # DC OK contact
+  estop_pin: gpio.47         # DC OK contact, no :low
 ```
 
 | State | DC OK | Pin | FluidNC |
 |---|---|---|---|
-| running | open | high | inactive |
-| E-stop pressed | closed | low | **alarm** |
-| broken wire | open | high | **inactive — no alarm** |
+| running | closed | low | inactive |
+| E-stop pressed | opens as the output decays | high | **alarm** |
+| broken wire | open | high | **alarm** |
 
-**That makes it fail-silent**, since a contact resting open cannot report its
-own broken wire.
-
-The consequence is mild here, unlike on the driver alarms. If this signal dies
-the E-stop still cuts power exactly as before; all that is lost is the
-controller knowing, which puts you back to remembering `$H` by hand. A dead ALM
-wire, by contrast, loses real protection.
-
-For a fail-safe version, sense the 48 V rail with an optocoupler instead: a
-PC817 and a 4.7 k 2 W resistor across the drivers' supply, transistor to the
-input, configured without `:low`. Rail present pulls the pin low and inactive;
-a dead LED, dead transistor or broken wire all leave it high and alarming. A
-few components rather than one wire.
+**Fail-safe**, unlike the driver alarms: a cut or disconnected wire reads the
+same as a cut supply. The board's input LED for this pin sits **lit
+continuously** in normal operation, because the closed contact holds it low.
+That is correct, not a fault — every other input on the block is dark until
+something happens and this one is the reverse.
 
 **Expect a startup alarm if the 48 V is not up when the Doberman finishes
 booting.** The pin reads active and FluidNC raises a startup alarm needing

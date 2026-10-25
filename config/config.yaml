@@ -138,18 +138,21 @@ macros:
 # Free: 48 and 3 - gpio.3 last, it is an ESP32-S3 strapping pin.
 #
 # --- E-stop ---
-# gpio.47 is the 48 V supply's DC OK contact, which opens when the output is
-# good and closes when it is not: measured 2026-10-24, hence :low. So it
-# reports any loss of the 48 V rail - the E-stop, a mains failure, a blown
-# fuse, the supply shutting down - not just the button.
+# gpio.47 is the 48 V supply's DC OK contact. It is CLOSED while the output is
+# good, so the pin rests low and no :low is wanted. Settled on the live pin:
+# signal to GND reads 0 V with the supply up. An earlier continuity check had
+# this backwards.
 #
-# Fail-silent: a contact resting open cannot report its own broken wire. Less
-# serious here than on the alarms, since the E-stop still cuts power either
-# way and only the controller's knowledge is lost. Test by pressing it and
+# Fail-safe - a broken wire reads open, the same as a cut supply, and alarms.
+# It also reports any loss of the 48 V rail rather than just the button: mains
+# failure, blown fuse, the supply shutting down on overload.
+#
+# The input LED for this pin sits lit in normal operation, because the closed
+# contact holds it low. That is correct. Test by pressing the E-stop and
 # looking for Pn:E.
 control:
   fault_pin: gpio.37:low
-  estop_pin: gpio.47:low
+  estop_pin: gpio.47
 
 spi:
   miso_pin: gpio.2
