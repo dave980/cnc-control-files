@@ -14,8 +14,9 @@
 *.ps1 text eol=crlf
 *.cmd text eol=crlf
 
+*.3mf binary
+*.stl binary
+*.f3d binary
 *.jpg binary
 *.png binary
 *.pdf binary
-*.stl binary
-*.f3d binary
