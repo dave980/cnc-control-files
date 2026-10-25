@@ -421,26 +421,41 @@ solid core.
 gpio.47 signal ── DC OK ── gpio.47 GND
 ```
 
+**Measured 2026-10-24: the contact is open with the supply on, closed with it
+off** — the opposite of the usual arrangement, and worth having checked rather
+than assumed.
+
 ```yaml
 control:
   fault_pin: gpio.37:low     # four CL57T alarms, paralleled
-  estop_pin: gpio.47         # DC OK contact, no :low
+  estop_pin: gpio.47:low     # DC OK contact
 ```
 
 | State | DC OK | Pin | FluidNC |
 |---|---|---|---|
-| running | closed | low | inactive |
-| E-stop pressed | opens as the output decays | high | **alarm** |
-| broken wire | open | high | **alarm** |
+| running | open | high | inactive |
+| E-stop pressed | closed | low | **alarm** |
+| broken wire | open | high | **inactive — no alarm** |
 
-Fail-safe, unlike the driver alarms: a cut or disconnected wire reads as
-pressed. The board's input LED for that pin sits **lit continuously** in normal
-operation, because the closed contact holds it low. That is correct, not a
-fault.
+**That makes it fail-silent**, since a contact resting open cannot report its
+own broken wire.
 
-**Confirm the contact's sense before trusting it.** Meter continuity across the
-DC OK pair: closed with the supply on, open with it off. If it reads the other
-way, add `:low`.
+The consequence is mild here, unlike on the driver alarms. If this signal dies
+the E-stop still cuts power exactly as before; all that is lost is the
+controller knowing, which puts you back to remembering `$H` by hand. A dead ALM
+wire, by contrast, loses real protection.
+
+For a fail-safe version, sense the 48 V rail with an optocoupler instead: a
+PC817 and a 4.7 k 2 W resistor across the drivers' supply, transistor to the
+input, configured without `:low`. Rail present pulls the pin low and inactive;
+a dead LED, dead transistor or broken wire all leave it high and alarming. A
+few components rather than one wire.
+
+**Expect a startup alarm if the 48 V is not up when the Doberman finishes
+booting.** The pin reads active and FluidNC raises a startup alarm needing
+Ctrl-X. That is arguably correct — the machine cannot move — but if both
+supplies come up from one switch it is a race, and it may appear intermittently
+on cold starts.
 
 **It covers more than the button.** DC OK says the 48 V output is not good,
 which catches a mains failure, a blown fuse, and the supply shutting down on
