@@ -89,7 +89,9 @@ M61 Q<n>        tell FluidNC what is in the spindle (Q0 if empty)
 
 **After an E-stop, `$H` before anything else.** The E-stop cuts motor and
 spindle power but leaves the controller running, so FluidNC does not know it
-happened and the position on screen is stale. See `docs/wiring.md`.
+happened and the position on screen is stale. Once the DC OK wire to
+`gpio.47` is run this becomes enforced rather than remembered — the controller
+raises a critical alarm that only a soft reset clears. See `docs/wiring.md`.
 
 `M61` is not optional. FluidNC sets `current_tool = -1` on every restart, and `tc.nc`
 aborts with an alarm when it sees a negative tool number. `$H` does not fix this —
@@ -119,9 +121,9 @@ Working:
 
 Not wired yet:
 
-- **E-stop signal to FluidNC** — the switch is hardwired and cuts power, but the
-  controller never hears about it. Hence `$H` after every E-stop. gpio.47 or
-  gpio.48 is free for it.
+- **E-stop signal to FluidNC** — config is in on `gpio.47:low`, fed from the
+  48 V supply's DC OK contact; the wire is not run yet. Until it is, `$H`
+  after every E-stop. See `docs/wiring.md`.
 
 Not fitted:
 

@@ -135,10 +135,21 @@ macros:
 #
 # The opto-isolated input block is ten pins: 42 41 40 39 38 37 36 48 47 3.
 # Used: 42/41/40/39 limits, 38 IR beam, 36 probe, 37 driver alarms.
-# Free: 48, 47, 3 - gpio.3 last, it is an ESP32-S3 strapping pin.
-# estop_pin can have 47 or 48 when a spare contact is fitted.
+# Free: 48 and 3 - gpio.3 last, it is an ESP32-S3 strapping pin.
+#
+# --- E-stop ---
+# gpio.47 is the 48 V supply's DC OK contact, which opens when the output is
+# good and closes when it is not: measured 2026-10-24, hence :low. So it
+# reports any loss of the 48 V rail - the E-stop, a mains failure, a blown
+# fuse, the supply shutting down - not just the button.
+#
+# Fail-silent: a contact resting open cannot report its own broken wire. Less
+# serious here than on the alarms, since the E-stop still cuts power either
+# way and only the controller's knowledge is lost. Test by pressing it and
+# looking for Pn:E.
 control:
   fault_pin: gpio.37:low
+  estop_pin: gpio.47:low
 
 spi:
   miso_pin: gpio.2
