@@ -317,12 +317,48 @@ connected. Repeat it after any work in the cabinet.
 `Pn:F` in the status report is the quick check — `?` lists active control pins,
 so it says whether the fault input is asserted right now without a meter.
 
+### The E-stop now signals the controller
+
+`control: estop_pin: gpio.47`, fed from the 48 V supply's DC OK contact.
+Verified 2026-10-24 by pressing the E-stop:
+
+```
+[MSG:DBG: estop_pin 1]
+[MSG:INFO: Stopped by estop_pin]
+[MSG:INFO: ALARM: Hard Stop]
+ALARM:13
+<Alarm|...|Pn:E>
+[MSG:ERR: Reset to continue]
+```
+
+`$H` after an E-stop is now enforced rather than remembered: the critical
+alarm only clears with a soft reset, which blocks homing until done and resets
+`current_tool`, so `M61` follows as usual.
+
+Because it senses the supply rather than the switch, it also reports a mains
+failure, a blown fuse or the supply shutting down on overload — anything that
+leaves the drivers without power and the position on screen stale.
+
+Getting the polarity right took two goes. A continuity check across the DC OK
+terminals had the two states transposed, which put `:low` in the config and
+produced `Pn:E` with everything healthy. Measuring at the input instead —
+signal to GND, against the pull-up — is unambiguous, and that is what settled
+it.
+
 ## Open
 
-### The E-stop is not signalled to FluidNC
+Nothing outstanding.
 
-The hardwired switch cuts motor and spindle power but leaves the Doberman
-running, so the controller keeps a stale position and nothing alarms. `$H`
-after every E-stop is the workaround. `estop_pin` from a spare contact would
-make it a real alarm. See `wiring.md`.
+## Recurring checks
 
+Two things here fail silently or drift, and neither announces itself:
+
+- **Driver alarms, per driver.** All four ALM outputs rest open, so the input
+  reads healthy whether four wires are landed or one. Unplug each encoder in
+  turn and command a short move; expect `Pn:F` and a critical alarm each time.
+  Repeat after any work in the cabinet.
+- **E-stop.** Press it and look for `Pn:E`. Fail-safe by wiring, so this is
+  less critical than the above, but it costs five seconds.
+- **Tool setter height.** Not electrical: its height is baked into every work
+  offset set since. If it is ever knocked or remounted, previously set work Z
+  zeros are wrong by that amount with nothing to indicate it.

@@ -87,11 +87,10 @@ $H              home — Z first, then XY with Y/Y2 auto-squaring
 M61 Q<n>        tell FluidNC what is in the spindle (Q0 if empty)
 ```
 
-**After an E-stop, `$H` before anything else.** The E-stop cuts motor and
-spindle power but leaves the controller running, so FluidNC does not know it
-happened and the position on screen is stale. Once the DC OK wire to
-`gpio.47` is run this becomes enforced rather than remembered — the controller
-raises a critical alarm that only a soft reset clears. See `docs/wiring.md`.
+**After an E-stop, Ctrl-X then `$H`.** The E-stop cuts motor and spindle power
+and the controller now hears about it through the supply's DC OK contact,
+raising a critical alarm that only a soft reset clears. That soft reset also
+resets `current_tool`, so `M61` follows. See `docs/wiring.md`.
 
 `M61` is not optional. FluidNC sets `current_tool = -1` on every restart, and `tc.nc`
 aborts with an alarm when it sees a negative tool number. `$H` does not fix this —
@@ -116,14 +115,10 @@ Working:
 - Driver faults stop the machine — all four CL57T alarms on `fault_pin: gpio.37:low`,
   each verified individually
 - Closed loop actually enabled — SW6 was on, so all four were running open loop
+- E-stop signals the controller — `estop_pin: gpio.47` from the 48 V supply's
+  DC OK contact, so a stale position after an E-stop is no longer possible
 - Full Vectric job runs clean (2026-10-20) after fixing a bad X sensor wire that
   caused a false limit trip; spindle now stops on any alarm
-
-Not wired yet:
-
-- **E-stop signal to FluidNC** — config is in on `gpio.47:low`, fed from the
-  48 V supply's DC OK contact; the wire is not run yet. Until it is, `$H`
-  after every E-stop. See `docs/wiring.md`.
 
 Not fitted:
 
