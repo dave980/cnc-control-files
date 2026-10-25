@@ -48,6 +48,8 @@ docs/tool-changer.md            ATC coordinates, sequence, recovery
 docs/troubleshooting.md         problems hit during commissioning and what fixed them
 docs/deploying.md               getting files onto the controller
 docs/images/                    photos of the machine and the wiring
+cad/dust-shoe/                  dust shoe: Fusion archive and per-part STLs
+cad/dust-extraction/            printable hose cuffs, adapters and couplers
 tools/deploy.sh                 upload config and macros over the network
 tools/deploy.ps1                the same, for Windows PowerShell
 tools/deploy.cmd                double-clickable launcher for the above
