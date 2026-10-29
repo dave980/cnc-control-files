@@ -57,6 +57,22 @@ The confirmation prompt still applies — a double click gets you as far as bein
 asked whether the machine is idle, not past it. `git pull --ff-only` refuses to
 merge if you have local commits, rather than quietly combining them.
 
+**You do not need to pull first.** The pull is part of the script. And if it
+fails, the script now stops instead of uploading: a refused pull used to print
+its error and carry on to deploy whatever was on disk, which looks identical to
+a successful deploy of the new files. Local commits in the way, a diverged
+branch, no network and a credential prompt all land there. The escape hatch, if
+you really do mean to deploy the working tree as it stands, is to skip the
+wrapper:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\deploy.ps1 -Board 192.168.0.23 -Restart
+```
+
+The check has to be written `if errorlevel 1`. Inside a parenthesised `cmd`
+block `%ERRORLEVEL%` is expanded once, at parse time, so `if %ERRORLEVEL% neq 0`
+tests the value from before `git` ran and never fires.
+
 ### Do not keep this repo in OneDrive
 
 A git repository inside a OneDrive folder is a known source of trouble.

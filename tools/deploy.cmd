@@ -18,6 +18,10 @@ echo  Repo: %CD%
 echo ===========================================================
 echo.
 
+rem  The pull below is checked with "if errorlevel 1" rather than
+rem  "if %ERRORLEVEL% neq 0" -- inside a parenthesised block cmd expands
+rem  %ERRORLEVEL% once, at parse time, so the latter holds the value from
+rem  before git ran and the check silently never fires.
 where git >nul 2>&1
 if errorlevel 1 (
     echo git not found on PATH - skipping the update check.
@@ -28,6 +32,22 @@ if errorlevel 1 (
     echo.
     echo Checking GitHub for updates...
     git pull --ff-only
+    if errorlevel 1 (
+        echo.
+        echo ===========================================================
+        echo  PULL FAILED - nothing has been uploaded.
+        echo.
+        echo  The files on disk may be older than GitHub, and deploying
+        echo  them would look exactly like success. Local edits in the
+        echo  way, a diverged branch, and no network all land here.
+        echo.
+        echo  To deploy what is on disk anyway, skipping the pull:
+        echo    powershell -ExecutionPolicy Bypass -File tools\deploy.ps1 -Board %BOARD% -Restart
+        echo ===========================================================
+        echo.
+        pause
+        exit /b 1
+    )
     echo.
     echo Now at:
     git log --oneline -1
