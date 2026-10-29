@@ -38,8 +38,8 @@ $files = @(
     (Join-Path $repo 'macros\dustshoe_load.nc')
 )
 
-function Invoke-Api([string]$cmd) {
-    & $curl -sS --max-time 15 --get --data-urlencode "commandText=$cmd" "http://$Board/command" 2>$null
+function Invoke-Api([string]$cmd, [int]$TimeoutSec = 15) {
+    & $curl -sS --max-time $TimeoutSec --get --data-urlencode "commandText=$cmd" "http://$Board/command" 2>$null
 }
 
 # --- is it there, and is it FluidNC? ---
@@ -91,10 +91,48 @@ $listing = & $curl -sS --max-time 15 "http://$Board/files?path=/"
 if ($Restart) {
     Write-Host ""
     Write-Host "Restarting ..."
-    Invoke-Api '$Bye' | Out-Null
-    Write-Host 'Re-home before moving: $H   then  M61 Q<n>'
+
+    # [ESP444]RESTART, not $Bye.
+    #
+    # FluidNC's /command endpoint runs a command only when it begins "[ESP" or
+    # "$/" (WebUIServer.cpp, _handle_web_command). Anything else goes to
+    # WSChannels::runGCode, which needs a websocket belonging to the caller's
+    # own HTTP session. curl has none, so getWSChannel(0, "") matches nothing
+    # and the server answers 500 "WebSocket dead". $Bye is a real command --
+    # it works typed into the WebUI console, which has a session -- but it is
+    # unreachable over HTTP, and this script used to discard the 500 and claim
+    # a restart that never happened. [ESP444]RESTART is what the WebUI's own
+    # restart dialog sends.
+    $reply = Invoke-Api '[ESP444]RESTART'
+    if ($reply -match 'Authentication failed|Parameter must be|WebSocket dead') {
+        Write-Host "  controller refused it: $reply"
+        throw "restart refused"
+    }
+
+    # Confirm it went down and came back. The case worth catching is a
+    # config.yaml that will not parse: the board reboots and never rejoins.
+    $sw = [Diagnostics.Stopwatch]::StartNew()
+    Start-Sleep -Seconds 3
+    Write-Host -NoNewline "  waiting for it to come back "
+    $back = $false
+    for ($i = 0; $i -lt 20; $i++) {
+        Start-Sleep -Seconds 2
+        if ((Invoke-Api '[ESP800]' 3) -match 'FluidNC') { $back = $true; break }
+        Write-Host -NoNewline "."
+    }
+    Write-Host ""
+
+    if ($back) {
+        Write-Host ("  back up after {0:n0} s." -f $sw.Elapsed.TotalSeconds)
+        Write-Host 'Re-home before moving: $H   then  M61 Q<n>'
+    } else {
+        Write-Host ("  no answer after {0:n0} s." -f $sw.Elapsed.TotalSeconds)
+        Write-Host "  Check the controller. A config.yaml that will not parse stops it"
+        Write-Host "  rejoining the network, and only the serial console says why."
+    }
 } else {
     Write-Host ""
-    Write-Host 'Config needs a restart to take effect: $Bye (or re-run with -Restart).'
+    Write-Host 'Config needs a restart to take effect. Type $Bye in the WebUI console'
+    Write-Host "  (that works - it has a websocket session), or re-run with -Restart."
     Write-Host "Macros are live immediately."
 }

@@ -85,7 +85,7 @@ but `.gitattributes` pins LF anyway to keep diffs clean between machines.
 
 ```
 ./tools/deploy.sh 192.168.0.23             # upload only
-./tools/deploy.sh 192.168.0.23 --restart   # upload then $Bye
+./tools/deploy.sh 192.168.0.23 --restart   # upload, reboot, wait for it
 ./tools/deploy.sh 192.168.0.23 --yes       # skip the confirmation prompt
 ```
 
@@ -114,8 +114,44 @@ Confirmed against FluidNC's `WebUIServer.cpp`:
 **The `/command` endpoint splits two ways, and it matters.** Commands starting
 with `[ESP` or `$/` go through `synchronousCommand` and their output comes back
 in the HTTP response. Everything else — `?`, `$LocalFS/List`, `$Bye` — goes
-through `websocketCommand`, so the output goes to the websocket and curl sees
-nothing useful.
+through `websocketCommand`.
+
+That second path does not just lose the output. It **does not run the command
+at all** unless a websocket belonging to the caller's own HTTP session is
+already open:
+
+```cpp
+// WebUIServer.cpp
+websocketCommand(request, cmd.c_str(), getPageid(request), auth_level);
+//   -> WSChannels::runGCode(pageid, cmd, session)
+//        -> getWSChannel(pageid, session)   // nullptr -> returns error
+//   -> request->send(500, "text/plain", "WebSocket dead")
+```
+
+`getPageid` returns 0 when there is no `PAGEID=` parameter, and curl sends no
+session cookie, so `getWSChannel(0, "")` looks for a channel whose session is
+the empty string. A browser's websocket carries a real session string and does
+not match. The answer is `500 WebSocket dead` and the command is discarded.
+
+This cost an evening. `deploy.ps1` sent `$Bye` to restart the board, threw the
+500 away, and printed "Restarting ..." — while the controller carried on
+running, still showing the WebUI's "files have changed" notice. The tell was
+that the notice survived a deploy but not a real reboot.
+
+**To restart over HTTP, send `[ESP444]RESTART`** — what the WebUI's own restart
+dialog uses, registered in `WebCommands.cpp`:
+
+```cpp
+new WebCommand("RESTART", WEBCMD, WA, "ESP444", "System/Control", setSystemMode);
+```
+
+`$Bye` is the same action (`FileCommands.cpp` registers it with a null
+`grblName`, so it is console-only) and works fine typed into the WebUI console,
+because that channel has a session. It is simply unreachable over HTTP.
+
+Both scripts now send `[ESP444]RESTART` and then poll `[ESP800]` until the
+board answers again, so a config that fails to parse on boot shows up as a
+board that never comes back rather than as a silent success.
 
 So over plain HTTP you can read:
 

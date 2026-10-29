@@ -42,7 +42,7 @@ FILES=(
     "${REPO}/macros/dustshoe_load.nc"
 )
 
-api() { curl -sS --max-time 15 --get --data-urlencode "commandText=$1" "http://${BOARD}/command"; }
+api() { curl -sS --max-time "${2:-15}" --get --data-urlencode "commandText=$1" "http://${BOARD}/command"; }
 
 # --- is it there, and is it FluidNC? ---
 # [ESP...] commands return their output in the HTTP response. Plain commands
@@ -98,10 +98,50 @@ curl -sS --max-time 15 "http://${BOARD}/files?path=/" | tr ',' '\n' | grep -i 'n
 if ${RESTART}; then
     echo
     echo "Restarting ..."
-    api '$Bye' > /dev/null || true
-    echo "Re-home before moving: \$H   then  M61 Q<n>"
+
+    # [ESP444]RESTART, not $Bye.
+    #
+    # FluidNC's /command endpoint runs a command only when it begins "[ESP" or
+    # "$/" (WebUIServer.cpp, _handle_web_command). Anything else goes to
+    # WSChannels::runGCode, which needs a websocket belonging to the caller's
+    # own HTTP session. curl has none, so getWSChannel(0, "") matches nothing
+    # and the server answers 500 "WebSocket dead". $Bye is a real command --
+    # it works typed into the WebUI console, which has a session -- but it is
+    # unreachable over HTTP, and discarding that 500 made this script claim a
+    # restart that never happened. [ESP444]RESTART is what the WebUI's own
+    # restart dialog sends.
+    reply="$(api '[ESP444]RESTART' || true)"
+    case "${reply}" in
+        *"Authentication failed"*|*"Parameter must be"*|*"WebSocket dead"*)
+            echo "  controller refused it: ${reply}" >&2
+            exit 1
+            ;;
+    esac
+
+    # Confirm it went down and came back. The case worth catching is a
+    # config.yaml that will not parse: the board reboots and never rejoins.
+    start=${SECONDS}
+    sleep 3
+    printf '  waiting for it to come back '
+    back=false
+    for _ in $(seq 20); do
+        sleep 2
+        if api '[ESP800]' 3 2>/dev/null | grep -q FluidNC; then back=true; break; fi
+        printf '.'
+    done
+    echo
+
+    if ${back}; then
+        echo "  back up after $((SECONDS - start)) s."
+        echo "Re-home before moving: \$H   then  M61 Q<n>"
+    else
+        echo "  no answer after $((SECONDS - start)) s."
+        echo "  Check the controller. A config.yaml that will not parse stops it"
+        echo "  rejoining the network, and only the serial console says why."
+    fi
 else
     echo
-    echo "Config needs a restart to take effect: \$Bye (or re-run with --restart)."
+    echo "Config needs a restart to take effect. Type \$Bye in the WebUI console"
+    echo "  (that works - it has a websocket session), or re-run with --restart."
     echo "Macros are live immediately."
 fi
