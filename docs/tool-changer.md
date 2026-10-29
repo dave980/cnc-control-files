@@ -201,6 +201,42 @@ longer tool reading more negative means something is inverted.
 `findzposition.nc` is unrelated to any of this — it creeps up at F250 until the
 IR beam breaks, to establish the magazine's tool recognition zones.
 
+### A tool that is already loaded is still measured
+
+`M6` for the tool already in the spindle used to return immediately:
+
+```gcode
+o1000 elseif [#<_selected_tool> EQ #<_current_tool>]
+    (print, Current tool selected. Tool change bypassed.)
+```
+
+That is the first bullet above, reached by accident. The commonest way to hit
+it is the ordinary one: power up, `M61 Q3` to tell FluidNC what is in the
+collet, load a program whose first tool is 3. The macro bypassed, no probe
+ran, no offset was set, and the first touch-off of work Z zero banked whatever
+offset happened to be active — usually none.
+
+Now the magazine is skipped but nothing else is. The bypass sets a flag:
+
+```gcode
+#<_rc_bypass> = 0
+o1050 if [#<_selected_tool> EQ #<_current_tool>]
+    #<_rc_bypass> = 1
+o1050 endif
+```
+
+and the unload and load blocks each open with `if [#<_rc_bypass> EQ 1]`, which
+is empty. So the spindle still parks the dust shoe, still clears the old offset
+with `G43.1 Z0`, still runs `M61`, still probes the setter, still refits the
+shoe and still returns to where the program was. Only the two trips to the
+pocket are missing, because the nut never has to be touched.
+
+It measures on **every** same-tool `M6`, not only the first. No state has to be
+carried between programs for that, and CAM emits `M6` only at a tool change, so
+in a real program the same-tool case *is* the first one. The cost of the extra
+measurement is about eight seconds; the cost of not having it is a tool diving
+through the work.
+
 ## The macro must not end over the tool setter
 
 **This broke a tool and the setter on 2026-10-08.** It is the most dangerous

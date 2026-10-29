@@ -1,9 +1,15 @@
 o1000 if [#<_current_tool> LT 0]
     (print, Current tool not initialized. Tool change aborted.)
     $Alarm/Send=3
-o1000 elseif [#<_selected_tool> EQ #<_current_tool>]
-    (print, Current tool selected. Tool change bypassed.)
 o1000 else
+    (The selected tool may already be loaded -- M61 says so after a restart.)
+    (Skip the magazine in that case, but still measure it on the setter:)
+    (otherwise no tool length offset is ever set and work Z zero is wrong.)
+    #<_rc_bypass> = 0
+    o1050 if [#<_selected_tool> EQ #<_current_tool>]
+        #<_rc_bypass> = 1
+        (print, Tool already loaded. Skipping the magazine, measuring on the setter.)
+    o1050 endif
     M5
     o1100 if [#<_metric> EQ 0]
         #<_rc_return_units> = 20
@@ -32,7 +38,8 @@ o1000 else
     G43.1 Z0
     G4 P0.1
     #<z_offset> = [0.000 - #<_z>]
-    o1300 if [#<_current_tool> EQ 0]
+    o1300 if [#<_rc_bypass> EQ 1]
+    o1300 elseif [#<_current_tool> EQ 0]
     o1300 elseif [#<_current_tool> GT 6]
         G53 G90 G0 Z0.000
         G53 G90 G0 X-1100.000 Y-32.000
@@ -66,7 +73,8 @@ o1000 else
             G53 G90 G0 Z0.000
         o1310 endif
     o1300 endif
-    o1400 if [#<_selected_tool> EQ 0]
+    o1400 if [#<_rc_bypass> EQ 1]
+    o1400 elseif [#<_selected_tool> EQ 0]
         G53 G90 G0 Z0.000
     o1400 elseif [#<_selected_tool> LE 6]
         G53 G90 G0 X-1211.400 Y[-85.400 - [[#<_selected_tool> - 1] * 45.000]]
