@@ -153,6 +153,42 @@ Both scripts now send `[ESP444]RESTART` and then poll `[ESP800]` until the
 board answers again, so a config that fails to parse on boot shows up as a
 board that never comes back rather than as a silent success.
 
+### The restart request never completes, and that is success
+
+`restart()` calls `protocol_send_event(&fullResetEvent)`. The board resets
+before the HTTP response is flushed, so the request dies with 0 bytes
+received:
+
+```
+curl: (28) Operation timed out after 15005 milliseconds with 0 bytes received
+```
+
+That is what a working restart looks like. Both scripts give this one call a
+2 s timeout and ignore the result. A *refusal* — bad auth, wrong parameter —
+answers immediately instead, which is why checking the reply still means
+something.
+
+### Why the scripts use `curl -s`, not `-sS`
+
+`-S` tells curl to print errors to stderr even in silent mode. In PowerShell
+5.1 with `$ErrorActionPreference = 'Stop'`, **anything** a native command
+writes to stderr is turned into a terminating `NativeCommandError` — and
+`2>$null` does not prevent it:
+
+```
+curl.exe : curl: (28) Operation timed out ...
+    + CategoryInfo : NotSpecified: (...) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+```
+
+So the expected timeout above killed `deploy.ps1` in the middle of the restart,
+after the reboot had already been triggered. With plain `-s`, curl stays quiet,
+exits non-zero, and every caller's existing "empty reply means no answer" check
+does the right thing. `$LASTEXITCODE` is there when the reason matters.
+
+This is a PowerShell hazard, not a curl one, but `deploy.sh` suppresses stderr
+on the same call so a successful restart does not print an alarming error.
+
 So over plain HTTP you can read:
 
 - `[ESP800]` — firmware info, which is what the script uses to confirm it is

@@ -38,8 +38,13 @@ $files = @(
     (Join-Path $repo 'macros\dustshoe_load.nc')
 )
 
+# -s, not -sS. With $ErrorActionPreference = 'Stop', anything a native command
+# writes to stderr becomes a terminating NativeCommandError in PowerShell 5.1,
+# and "2>$null" does not prevent it -- a curl timeout here killed the script
+# mid-restart. Every caller treats an empty reply as "no answer", which is all
+# the detail any of them need; $LASTEXITCODE carries the reason if it matters.
 function Invoke-Api([string]$cmd, [int]$TimeoutSec = 15) {
-    & $curl -sS --max-time $TimeoutSec --get --data-urlencode "commandText=$cmd" "http://$Board/command" 2>$null
+    & $curl -s --max-time $TimeoutSec --get --data-urlencode "commandText=$cmd" "http://$Board/command"
 }
 
 # --- is it there, and is it FluidNC? ---
@@ -74,7 +79,7 @@ foreach ($f in $files) {
     $fwd  = $f -replace '\\', '/'
     Write-Host ("  {0,-20} {1,6} bytes ... " -f $name, $size) -NoNewline
     # <filename>S is FluidNC's size field; it verifies the transfer end to end
-    & $curl -sS --max-time 30 `
+    & $curl -s --max-time 30 `
         -F "${name}S=$size" `
         -F "file=@${fwd};filename=$name" `
         "http://$Board/files" | Out-Null
@@ -85,7 +90,7 @@ foreach ($f in $files) {
 # --- verify: /files returns a JSON listing over plain HTTP ---
 Write-Host ""
 Write-Host "On the controller now:"
-$listing = & $curl -sS --max-time 15 "http://$Board/files?path=/"
+$listing = & $curl -s --max-time 15 "http://$Board/files?path=/"
 ($listing -split ',') | Where-Object { $_ -match 'name|size' } | ForEach-Object { Write-Host "  $_" }
 
 if ($Restart) {
@@ -103,7 +108,12 @@ if ($Restart) {
     # unreachable over HTTP, and this script used to discard the 500 and claim
     # a restart that never happened. [ESP444]RESTART is what the WebUI's own
     # restart dialog sends.
-    $reply = Invoke-Api '[ESP444]RESTART'
+    #
+    # 2 s, because the reply never comes: restart() calls
+    # protocol_send_event(&fullResetEvent) and the board resets before the HTTP
+    # response is flushed, so the request is cut off with 0 bytes. That is the
+    # successful case. A refusal, by contrast, answers immediately.
+    $reply = Invoke-Api '[ESP444]RESTART' 2
     if ($reply -match 'Authentication failed|Parameter must be|WebSocket dead') {
         Write-Host "  controller refused it: $reply"
         throw "restart refused"

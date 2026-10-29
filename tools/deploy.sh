@@ -110,7 +110,12 @@ if ${RESTART}; then
     # unreachable over HTTP, and discarding that 500 made this script claim a
     # restart that never happened. [ESP444]RESTART is what the WebUI's own
     # restart dialog sends.
-    reply="$(api '[ESP444]RESTART' || true)"
+    # 2 s, because the reply never comes: restart() calls
+    # protocol_send_event(&fullResetEvent) and the board resets before the HTTP
+    # response is flushed, so curl is cut off with 0 bytes. That is the
+    # successful case, so the timeout and the error text are both expected. A
+    # refusal, by contrast, answers immediately.
+    reply="$(api '[ESP444]RESTART' 2 2>/dev/null || true)"
     case "${reply}" in
         *"Authentication failed"*|*"Parameter must be"*|*"WebSocket dead"*)
             echo "  controller refused it: ${reply}" >&2
