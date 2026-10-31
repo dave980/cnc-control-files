@@ -40,6 +40,7 @@ FILES=(
     "${REPO}/macros/findzposition.nc"
     "${REPO}/macros/dustshoe_unload.nc"
     "${REPO}/macros/dustshoe_load.nc"
+    "${REPO}/macros/zprobe.nc"
 )
 
 api() { curl -sS --max-time "${2:-15}" --get --data-urlencode "commandText=$1" "http://${BOARD}/command"; }

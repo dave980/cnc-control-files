@@ -130,6 +130,7 @@ macros:
   macro1: $LocalFS/Run=findzposition.nc
   macro2: $LocalFS/Run=dustshoe_unload.nc   # park dust shoe in its stand
   macro3: $LocalFS/Run=dustshoe_load.nc     # pick dust shoe up from its stand
+  macro4: $LocalFS/Run=zprobe.nc            # Z zero on the work with the touch plate (after M6)
 
 # --- Driver alarms ---
 # ALM rests open and pulls low on alarm: measured 2026-10-24 on the Z driver,

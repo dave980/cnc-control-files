@@ -35,7 +35,8 @@ $files = @(
     (Join-Path $repo 'macros\measuretool.nc'),
     (Join-Path $repo 'macros\findzposition.nc'),
     (Join-Path $repo 'macros\dustshoe_unload.nc'),
-    (Join-Path $repo 'macros\dustshoe_load.nc')
+    (Join-Path $repo 'macros\dustshoe_load.nc'),
+    (Join-Path $repo 'macros\zprobe.nc')
 )
 
 # -s, not -sS. With $ErrorActionPreference = 'Stop', anything a native command
