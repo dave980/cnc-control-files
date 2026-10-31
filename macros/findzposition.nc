@@ -17,5 +17,6 @@ o3000 while [#5399 EQ 0]
     M66 P0 L0
 o3000 endwhile
 G90
+#<_rc_z_pos> = #<_abs_z>
+(print, Z Position (machine, mm): #<_rc_z_pos>)
 G[#<_rc_return_units>]
-(print, Z Position: #<_rc_z_pos>)
