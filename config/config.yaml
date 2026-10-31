@@ -115,8 +115,11 @@ axes:
 # Dust cover is NOT controlled from here -- no user_outputs section, and the
 # M64 P1 / M65 P1 lines are stripped out of tc.nc to match. The cover must be
 # removed or secured open, because tc.nc drives Z to -105 into the magazine.
+# Two probe inputs, ORed by FluidNC: G38 stops on either. The status report shows
+# Pn:P for the touch plate and Pn:T for the tool setter, so each can be tested alone.
 probe:
-  pin: gpio.36:low             # Green wire: tool setter
+  pin: gpio.48:low             # V1 Engineering touch plate: plate wire to signal, clip wire to GND
+  toolsetter_pin: gpio.36:low  # Green wire: tool setter
   check_mode_start: true
 
 user_inputs:
@@ -134,8 +137,9 @@ macros:
 # All ALM to gpio.37 signal, all COM- to that connector's GND.
 #
 # The opto-isolated input block is ten pins: 42 41 40 39 38 37 36 48 47 3.
-# Used: 42/41/40/39 limits, 38 IR beam, 36 probe, 37 driver alarms.
-# Free: 48 and 3 - gpio.3 last, it is an ESP32-S3 strapping pin.
+# Used: 42/41/40/39 limits, 38 IR beam, 36 tool setter, 37 driver alarms,
+# 48 touch plate, 47 E-stop.
+# Free: 3 only - an ESP32-S3 strapping pin, so keep it for something inactive at boot.
 #
 # --- E-stop ---
 # gpio.47 is the 48 V supply's DC OK contact. It is CLOSED while the output is

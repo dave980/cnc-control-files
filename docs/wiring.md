@@ -62,7 +62,7 @@ a commanded S24000.
 |---|---|---|
 | Red | 5 V | input header Vcc |
 | Black | Ground | input header GND |
-| Green | Tool setter | gpio.36, `probe: pin: gpio.36:low` |
+| Green | Tool setter | gpio.36, `probe: toolsetter_pin: gpio.36:low` |
 | Yellow | IR beam | gpio.38, `user_inputs: digital0_pin: gpio.38:low` |
 | Blue | Dust cover | see below — not currently connected |
 
@@ -143,11 +143,14 @@ the contiguous 36-42 range it looks like — 48, 47 and 3 sit on the end.
 | gpio.40 | Y2 limit |
 | gpio.39 | Z limit |
 | gpio.38 | IR beam |
-| **gpio.37** | **free** |
-| gpio.36 | probe / tool setter |
-| **gpio.48** | **free** |
-| **gpio.47** | **free** |
+| gpio.37 | CL57T ALM, four ganged (`control: fault_pin`) |
+| gpio.36 | tool setter (`probe: toolsetter_pin`) |
+| gpio.48 | V1 Engineering touch plate (`probe: pin`) — plate to signal, clip to GND |
+| gpio.47 | E-stop, 48 V supply DC OK contact (`control: estop_pin`) |
 | **gpio.3** | **free, but see below** |
+
+FluidNC ORs the two probe pins, so G38 stops on either; `?` shows `Pn:P` for
+the plate and `Pn:T` for the setter.
 
 So `fault_pin` and `estop_pin` can each have an isolated pin, with two spare.
 Every one of them is optocoupled, has an onboard pull-up (never add `:pu`), and
